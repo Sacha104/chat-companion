@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Sparkles, PanelLeftClose, PanelLeft } from "lucide-react";
+import { Sparkles, PanelLeftClose, PanelLeft, Zap } from "lucide-react";
 import ChatSidebar from "@/components/ChatSidebar";
 import ChatInput from "@/components/ChatInput";
 

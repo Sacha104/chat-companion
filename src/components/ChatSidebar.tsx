@@ -54,8 +54,11 @@ const ChatSidebar = ({ conversations, activeId, onSelect, onNewChat, isOpen }: C
 
   return (
     <aside className="flex h-full w-64 flex-col bg-sidebar-bg border-r border-sidebar-border animate-fade-in">
-      {/* New chat button */}
-      <div className="p-3">
+      {/* Top actions */}
+      <div className="p-3 space-y-2">
+        <button className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-sidebar-hover transition-colors active:scale-[0.95]">
+          <Menu className="h-4 w-4" />
+        </button>
         <button
           onClick={onNewChat}
           className="group flex w-full items-center gap-2.5 rounded-lg border border-border/60 px-3 py-2.5 text-sm font-medium text-foreground transition-all hover:bg-sidebar-hover active:scale-[0.97]"

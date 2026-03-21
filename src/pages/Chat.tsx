@@ -53,12 +53,16 @@ const Chat = () => {
 
       <div className="flex flex-1 flex-col min-w-0">
         {/* Header */}
-        <header className="flex h-12 items-center gap-2 border-b border-border px-3">
+        <header className="flex h-12 items-center justify-between border-b border-border px-3">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-secondary transition-colors active:scale-[0.95]"
           >
             {sidebarOpen ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeft className="h-4 w-4" />}
+          </button>
+          <button className="flex items-center gap-1.5 rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-primary/20 active:scale-[0.96]">
+            <Zap className="h-3.5 w-3.5" />
+            Upgrade
           </button>
         </header>
 

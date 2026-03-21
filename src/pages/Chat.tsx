@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Sparkles, PanelLeftClose, PanelLeft, Zap } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import ChatSidebar from "@/components/ChatSidebar";
 import ChatInput from "@/components/ChatInput";
 
@@ -17,23 +19,90 @@ const DEMO_CONVERSATIONS = [
   { id: "5", title: "Plan de voyage au Japon", date: "older" },
 ];
 
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
+
 const Chat = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [messages, setMessages] = useState<Message[]>([]);
   const [activeConv, setActiveConv] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSend = (content: string) => {
+  const handleSend = async (content: string) => {
     const userMsg: Message = { id: Date.now().toString(), role: "user", content };
-    setMessages((prev) => [...prev, userMsg]);
+    const updatedMessages = [...messages, userMsg];
+    setMessages(updatedMessages);
+    setIsLoading(true);
 
-    setTimeout(() => {
-      const aiMsg: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "Merci pour votre message ! Je suis une démo d'interface — la logique IA n'est pas encore connectée.",
-      };
-      setMessages((prev) => [...prev, aiMsg]);
-    }, 800);
+    let assistantSoFar = "";
+
+    const upsertAssistant = (chunk: string) => {
+      assistantSoFar += chunk;
+      setMessages((prev) => {
+        const last = prev[prev.length - 1];
+        if (last?.role === "assistant") {
+          return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantSoFar } : m));
+        }
+        return [...prev, { id: (Date.now() + 1).toString(), role: "assistant", content: assistantSoFar }];
+      });
+    };
+
+    try {
+      const resp = await fetch(CHAT_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({
+          messages: updatedMessages.map((m) => ({ role: m.role, content: m.content })),
+          provider: "openai",
+        }),
+      });
+
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({ error: "Erreur inconnue" }));
+        throw new Error(err.error || `Erreur ${resp.status}`);
+      }
+
+      if (!resp.body) throw new Error("Pas de stream");
+
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        let newlineIndex: number;
+        while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
+          let line = buffer.slice(0, newlineIndex);
+          buffer = buffer.slice(newlineIndex + 1);
+          if (line.endsWith("\r")) line = line.slice(0, -1);
+          if (!line.startsWith("data: ")) continue;
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === "[DONE]") break;
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const delta = parsed.choices?.[0]?.delta?.content;
+            if (delta) upsertAssistant(delta);
+          } catch {
+            buffer = line + "\n" + buffer;
+            break;
+          }
+        }
+      }
+    } catch (e: any) {
+      console.error("Chat error:", e);
+      toast.error(e.message || "Erreur lors de la communication avec l'IA");
+      // Remove the user message if no assistant reply was started
+      if (!assistantSoFar) {
+        setMessages((prev) => prev.filter((m) => m.id !== userMsg.id));
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleNewChat = () => {
@@ -73,7 +142,7 @@ const Chat = () => {
               <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 border border-primary/15">
                 <Sparkles className="h-8 w-8 text-primary" />
               </div>
-              <h2 className="text-xl font-semibold text-foreground" style={{ lineHeight: '1.1' }}>
+              <h2 className="text-xl font-semibold text-foreground" style={{ lineHeight: "1.1" }}>
                 Comment puis-je vous aider ?
               </h2>
               <p className="mt-2 text-sm text-muted-foreground max-w-xs text-center">
@@ -83,11 +152,7 @@ const Chat = () => {
           ) : (
             <div className="mx-auto max-w-2xl px-4 py-6 space-y-4">
               {messages.map((msg, i) => (
-                <div
-                  key={msg.id}
-                  className="animate-fade-up"
-                  style={{ animationDelay: `${i * 60}ms` }}
-                >
+                <div key={msg.id} className="animate-fade-up" style={{ animationDelay: `${i * 60}ms` }}>
                   {msg.role === "user" ? (
                     <div className="flex justify-end">
                       <div className="max-w-[80%] rounded-2xl rounded-br-md bg-chat-user px-4 py-2.5 text-sm text-foreground">
@@ -101,17 +166,32 @@ const Chat = () => {
                       </div>
                       <div className="max-w-[85%] rounded-2xl rounded-tl-md bg-chat-ai px-4 py-2.5 text-sm text-foreground leading-relaxed">
                         {msg.content}
+                        {isLoading && msg === messages[messages.length - 1] && (
+                          <span className="ml-1 inline-block h-3 w-1.5 animate-pulse rounded-full bg-primary/60" />
+                        )}
                       </div>
                     </div>
                   )}
                 </div>
               ))}
+              {isLoading && messages[messages.length - 1]?.role === "user" && (
+                <div className="flex gap-3 animate-fade-up">
+                  <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                    <Sparkles className="h-3.5 w-3.5 text-primary" />
+                  </div>
+                  <div className="flex items-center gap-1 rounded-2xl rounded-tl-md bg-chat-ai px-4 py-3">
+                    <span className="h-2 w-2 rounded-full bg-muted-foreground/40 animate-pulse" />
+                    <span className="h-2 w-2 rounded-full bg-muted-foreground/40 animate-pulse" style={{ animationDelay: "150ms" }} />
+                    <span className="h-2 w-2 rounded-full bg-muted-foreground/40 animate-pulse" style={{ animationDelay: "300ms" }} />
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
 
         {/* Input */}
-        <ChatInput onSend={handleSend} />
+        <ChatInput onSend={handleSend} disabled={isLoading} />
       </div>
     </div>
   );

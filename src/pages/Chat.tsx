@@ -163,8 +163,11 @@ const Chat = () => {
                       <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                         <Sparkles className="h-3.5 w-3.5 text-primary" />
                       </div>
-                      <div className="max-w-[85%] rounded-2xl rounded-tl-md bg-chat-ai px-4 py-2.5 text-sm text-foreground leading-relaxed">
-                        {msg.content}
+                      <div className="group/msg relative max-w-[85%] rounded-2xl rounded-tl-md bg-chat-ai px-4 py-2.5 text-sm text-foreground leading-relaxed">
+                        <pre className="whitespace-pre-wrap font-[inherit]">{msg.content}</pre>
+                        {!isLoading && (
+                          <CopyButton text={msg.content} />
+                        )}
                         {isLoading && msg === messages[messages.length - 1] && (
                           <span className="ml-1 inline-block h-3 w-1.5 animate-pulse rounded-full bg-primary/60" />
                         )}

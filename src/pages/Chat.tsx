@@ -142,10 +142,10 @@ const Chat = () => {
                 <Sparkles className="h-8 w-8 text-primary" />
               </div>
               <h2 className="text-xl font-semibold text-foreground" style={{ lineHeight: "1.1" }}>
-                Comment puis-je vous aider ?
+                Décrivez ce que vous voulez
               </h2>
               <p className="mt-2 text-sm text-muted-foreground max-w-xs text-center">
-                Posez-moi une question, demandez une analyse ou explorez des idées.
+                Je génère un prompt optimisé prêt à copier-coller dans n'importe quelle IA.
               </p>
             </div>
           ) : (

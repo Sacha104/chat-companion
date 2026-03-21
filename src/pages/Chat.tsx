@@ -10,6 +10,24 @@ interface Message {
   content: string;
 }
 
+const CopyButton = ({ text }: { text: string }) => {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    toast.success("Prompt copié !");
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <button
+      onClick={handleCopy}
+      className="absolute -bottom-3 right-2 flex h-7 w-7 items-center justify-center rounded-lg bg-secondary border border-border text-muted-foreground opacity-0 group-hover/msg:opacity-100 transition-all hover:text-foreground active:scale-[0.93]"
+    >
+      {copied ? <Check className="h-3.5 w-3.5 text-primary" /> : <Copy className="h-3.5 w-3.5" />}
+    </button>
+  );
+};
+
 const DEMO_CONVERSATIONS = [
   { id: "1", title: "Comment fonctionne React ?", date: "today" },
   { id: "2", title: "Recette de gâteau au chocolat", date: "today" },

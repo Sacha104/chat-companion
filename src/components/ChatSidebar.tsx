@@ -1,4 +1,5 @@
-import { Plus, MessageSquare, Settings, User, Menu } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Plus, MessageSquare, Settings, User, Menu, Building2, Bot } from "lucide-react";
 
 interface Conversation {
   id: string;
@@ -15,6 +16,19 @@ interface ChatSidebarProps {
 }
 
 const ChatSidebar = ({ conversations, activeId, onSelect, onNewChat, isOpen }: ChatSidebarProps) => {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    if (menuOpen) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [menuOpen]);
+
   if (!isOpen) return null;
 
   const grouped = {
@@ -56,9 +70,36 @@ const ChatSidebar = ({ conversations, activeId, onSelect, onNewChat, isOpen }: C
     <aside className="flex h-full w-64 flex-col bg-sidebar-bg border-r border-sidebar-border animate-fade-in">
       {/* Top actions */}
       <div className="p-3 space-y-2">
-        <button className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-sidebar-hover transition-colors active:scale-[0.95]">
-          <Menu className="h-4 w-4" />
-        </button>
+        <div className="relative" ref={menuRef}>
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-sidebar-hover transition-colors active:scale-[0.95]"
+          >
+            <Menu className="h-4 w-4" />
+          </button>
+
+          {menuOpen && (
+            <div className="absolute left-0 top-10 z-50 w-48 rounded-xl border border-border bg-popover p-1 shadow-xl shadow-black/20 animate-fade-up"
+              style={{ animationDuration: "200ms" }}
+            >
+              <button
+                onClick={() => setMenuOpen(false)}
+                className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-popover-foreground hover:bg-secondary transition-colors active:scale-[0.97]"
+              >
+                <Building2 className="h-4 w-4 text-muted-foreground" />
+                Notre société
+              </button>
+              <button
+                onClick={() => setMenuOpen(false)}
+                className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-popover-foreground hover:bg-secondary transition-colors active:scale-[0.97]"
+              >
+                <Bot className="h-4 w-4 text-muted-foreground" />
+                Nos IAs
+              </button>
+            </div>
+          )}
+        </div>
+
         <button
           onClick={onNewChat}
           className="group flex w-full items-center gap-2.5 rounded-lg border border-border/60 px-3 py-2.5 text-sm font-medium text-foreground transition-all hover:bg-sidebar-hover active:scale-[0.97]"

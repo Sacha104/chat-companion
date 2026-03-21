@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Sparkles, PanelLeftClose, PanelLeft, Zap } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { Sparkles, PanelLeftClose, PanelLeft, Zap, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
 import ChatSidebar from "@/components/ChatSidebar";
 import ChatInput from "@/components/ChatInput";
@@ -10,6 +9,24 @@ interface Message {
   role: "user" | "assistant";
   content: string;
 }
+
+const CopyButton = ({ text }: { text: string }) => {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    toast.success("Prompt copié !");
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <button
+      onClick={handleCopy}
+      className="absolute -bottom-3 right-2 flex h-7 w-7 items-center justify-center rounded-lg bg-secondary border border-border text-muted-foreground opacity-0 group-hover/msg:opacity-100 transition-all hover:text-foreground active:scale-[0.93]"
+    >
+      {copied ? <Check className="h-3.5 w-3.5 text-primary" /> : <Copy className="h-3.5 w-3.5" />}
+    </button>
+  );
+};
 
 const DEMO_CONVERSATIONS = [
   { id: "1", title: "Comment fonctionne React ?", date: "today" },
@@ -143,10 +160,10 @@ const Chat = () => {
                 <Sparkles className="h-8 w-8 text-primary" />
               </div>
               <h2 className="text-xl font-semibold text-foreground" style={{ lineHeight: "1.1" }}>
-                Comment puis-je vous aider ?
+                Décrivez ce que vous voulez
               </h2>
               <p className="mt-2 text-sm text-muted-foreground max-w-xs text-center">
-                Posez-moi une question, demandez une analyse ou explorez des idées.
+                Je génère un prompt optimisé prêt à copier-coller dans n'importe quelle IA.
               </p>
             </div>
           ) : (
@@ -164,8 +181,11 @@ const Chat = () => {
                       <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                         <Sparkles className="h-3.5 w-3.5 text-primary" />
                       </div>
-                      <div className="max-w-[85%] rounded-2xl rounded-tl-md bg-chat-ai px-4 py-2.5 text-sm text-foreground leading-relaxed">
-                        {msg.content}
+                      <div className="group/msg relative max-w-[85%] rounded-2xl rounded-tl-md bg-chat-ai px-4 py-2.5 text-sm text-foreground leading-relaxed">
+                        <pre className="whitespace-pre-wrap font-[inherit]">{msg.content}</pre>
+                        {!isLoading && (
+                          <CopyButton text={msg.content} />
+                        )}
                         {isLoading && msg === messages[messages.length - 1] && (
                           <span className="ml-1 inline-block h-3 w-1.5 animate-pulse rounded-full bg-primary/60" />
                         )}

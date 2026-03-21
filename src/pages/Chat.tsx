@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Sparkles, PanelLeftClose, PanelLeft, Zap } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { Sparkles, PanelLeftClose, PanelLeft, Zap, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
 import ChatSidebar from "@/components/ChatSidebar";
 import ChatInput from "@/components/ChatInput";

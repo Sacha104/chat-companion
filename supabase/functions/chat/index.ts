@@ -89,7 +89,7 @@ Règles :
     const response = await fetch(cfg.url, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${apiKey}`,
+        ...cfg.authHeader(apiKey),
         "Content-Type": "application/json",
       },
       body: JSON.stringify(cfg.buildBody([systemMessage, ...messages], model)),
@@ -112,10 +112,20 @@ Règles :
       });
     }
 
-    // Stream the response through
-    return new Response(response.body, {
-      headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
-    });
+    if (cfg.stream) {
+      // Stream SSE response through
+      return new Response(response.body, {
+        headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+      });
+    } else {
+      // Non-streaming: parse and return as SSE-compatible format
+      const data = await response.json();
+      const text = data.output ?? data.result ?? data.text ?? JSON.stringify(data);
+      const ssePayload = `data: ${JSON.stringify({ choices: [{ delta: { content: text } }] })}\n\ndata: [DONE]\n\n`;
+      return new Response(ssePayload, {
+        headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+      });
+    }
   } catch (e) {
     console.error("chat function error:", e);
     return new Response(

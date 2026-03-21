@@ -9,7 +9,7 @@ const corsHeaders = {
 // Supported providers — extend this map to add more AI APIs
 const PROVIDERS: Record<
   string,
-  { envKey: string; url: string; buildBody: (messages: any[], model?: string) => any }
+  { envKey: string; url: string; buildBody: (messages: any[], model?: string) => any; authHeader: (key: string) => Record<string, string>; stream: boolean }
 > = {
   openai: {
     envKey: "OPENAI_API_KEY",
@@ -19,9 +19,29 @@ const PROVIDERS: Record<
       messages,
       stream: true,
     }),
+    authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
+    stream: true,
   },
-  // Add more providers here, e.g.:
-  // anthropic: { envKey: "ANTHROPIC_API_KEY", url: "...", buildBody: ... },
+  runwayml: {
+    envKey: "RUNWAYML_API_KEY",
+    url: "https://api.dev.runwayml.com/v1/chat/completions",
+    buildBody: (messages, model) => ({
+      model: model ?? "runway",
+      messages,
+      stream: true,
+    }),
+    authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
+    stream: true,
+  },
+  deepai: {
+    envKey: "DEEPAI_API_KEY",
+    url: "https://api.deepai.org/api/text-generator",
+    buildBody: (messages) => ({
+      text: messages.map((m: any) => m.content).join("\n"),
+    }),
+    authHeader: (key) => ({ "api-key": key }),
+    stream: false,
+  },
 };
 
 serve(async (req) => {

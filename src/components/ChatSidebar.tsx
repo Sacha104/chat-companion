@@ -1,4 +1,4 @@
-import { Plus, MessageSquare, Settings, User } from "lucide-react";
+import { Plus, MessageSquare, Settings, User, Menu } from "lucide-react";
 
 interface Conversation {
   id: string;

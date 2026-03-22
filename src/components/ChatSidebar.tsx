@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Plus, MessageSquare, Settings, User, Menu, Building2, Bot } from "lucide-react";
 
 interface Conversation {

@@ -73,12 +73,40 @@ export type Database = {
           },
         ]
       }
+      user_credits: {
+        Row: {
+          credits: number
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          credits?: number
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          credits?: number
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      add_credits: {
+        Args: { p_amount: number; p_user_id: string }
+        Returns: number
+      }
+      deduct_credits: {
+        Args: { p_amount: number; p_user_id: string }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never

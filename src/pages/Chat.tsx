@@ -308,6 +308,7 @@ const Chat = () => {
                             <PromptExecutor
                               prompt={msg.content}
                               onExecutionResult={(result) => handleExecutionResult(msg.id, result)}
+                              onCreditsChanged={refetchCredits}
                             />
 
                             {/* Execution result */}

@@ -85,7 +85,7 @@ const ChatSidebar = ({ conversations, activeId, onSelect, onNewChat, isOpen }: C
               style={{ animationDuration: "200ms" }}
             >
               <button
-                onClick={() => setMenuOpen(false)}
+                onClick={() => { setMenuOpen(false); navigate("/company"); }}
                 className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-popover-foreground hover:bg-secondary transition-colors active:scale-[0.97]"
               >
                 <Building2 className="h-4 w-4 text-muted-foreground" />

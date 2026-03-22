@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Navigate } from "react-router-dom";
+import { useNavigate, Navigate, Link } from "react-router-dom";
 import { Sparkles, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -12,6 +12,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   if (loading) {
     return (
@@ -31,6 +32,11 @@ const Login = () => {
 
     try {
       if (isSignUp) {
+        if (!acceptedTerms) {
+          toast.error("Vous devez accepter les conditions d'utilisation et la politique de confidentialité.");
+          setIsLoading(false);
+          return;
+        }
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -97,9 +103,30 @@ const Login = () => {
             />
           </div>
 
+          {isSignUp && (
+            <label className="flex items-start gap-2.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={acceptedTerms}
+                onChange={(e) => setAcceptedTerms(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-border accent-primary"
+              />
+              <span className="text-xs text-muted-foreground leading-relaxed">
+                J'accepte les{" "}
+                <Link to="/terms" className="text-primary hover:underline" target="_blank">
+                  conditions d'utilisation
+                </Link>{" "}
+                et la{" "}
+                <Link to="/privacy" className="text-primary hover:underline" target="_blank">
+                  politique de confidentialité
+                </Link>
+              </span>
+            </label>
+          )}
+
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || (isSignUp && !acceptedTerms)}
             className="group mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-all hover:brightness-110 active:scale-[0.97] disabled:opacity-60"
           >
             {isLoading ? (

@@ -109,7 +109,7 @@ const Pricing = () => {
                   </span>
                 )}
                 {isCurrent && (
-                  <span className="absolute -top-3 right-4 rounded-full bg-emerald-500 px-3 py-0.5 text-[11px] font-semibold text-white flex items-center gap-1">
+                  <span className="absolute -top-3 right-4 rounded-full bg-primary px-3 py-0.5 text-[11px] font-semibold text-primary-foreground flex items-center gap-1">
                     <Crown className="h-3 w-3" /> Actuel
                   </span>
                 )}

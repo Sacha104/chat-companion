@@ -68,7 +68,7 @@ const Chat = () => {
       .select("id, role, content")
       .eq("conversation_id", id)
       .order("created_at", { ascending: true });
-    if (data) setMessages(data);
+    if (data) setMessages(data.map(m => ({ ...m, role: m.role as "user" | "assistant" })));
   };
 
   // Create a new conversation

@@ -188,6 +188,7 @@ const PromptExecutor = ({ prompt, onExecutionResult, onCreditsChanged }: PromptE
       });
     } finally {
       setExecuting(false);
+      onCreditsChanged?.();
     }
   };
 

@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Wand2, Code, Image, Video, Type, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface AiSuggestion {
   provider: string;

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Plus, MessageSquare, Settings, User, Menu, Building2, Bot } from "lucide-react";
 
 interface Conversation {
@@ -18,6 +19,7 @@ interface ChatSidebarProps {
 const ChatSidebar = ({ conversations, activeId, onSelect, onNewChat, isOpen }: ChatSidebarProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -90,7 +92,7 @@ const ChatSidebar = ({ conversations, activeId, onSelect, onNewChat, isOpen }: C
                 Notre société
               </button>
               <button
-                onClick={() => setMenuOpen(false)}
+                onClick={() => { setMenuOpen(false); navigate("/our-ais"); }}
                 className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-popover-foreground hover:bg-secondary transition-colors active:scale-[0.97]"
               >
                 <Bot className="h-4 w-4 text-muted-foreground" />

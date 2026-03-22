@@ -172,7 +172,49 @@ Règles :
     }
 
     if (cfg.stream) {
-      // Stream SSE response through
+      if (provider === "anthropic") {
+        // Transform Anthropic SSE to OpenAI-compatible SSE
+        const reader = response.body!.getReader();
+        const decoder = new TextDecoder();
+        const encoder = new TextEncoder();
+        const stream = new ReadableStream({
+          async pull(controller) {
+            let buf = "";
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) {
+                controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+                controller.close();
+                return;
+              }
+              buf += decoder.decode(value, { stream: true });
+              let idx;
+              while ((idx = buf.indexOf("\n")) !== -1) {
+                const line = buf.slice(0, idx).trim();
+                buf = buf.slice(idx + 1);
+                if (!line.startsWith("data: ")) continue;
+                const json = line.slice(6);
+                if (json === "[DONE]") {
+                  controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+                  controller.close();
+                  return;
+                }
+                try {
+                  const evt = JSON.parse(json);
+                  if (evt.type === "content_block_delta" && evt.delta?.text) {
+                    const normalized = { choices: [{ delta: { content: evt.delta.text } }] };
+                    controller.enqueue(encoder.encode(`data: ${JSON.stringify(normalized)}\n\n`));
+                  }
+                } catch { /* skip */ }
+              }
+            }
+          },
+        });
+        return new Response(stream, {
+          headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+        });
+      }
+      // OpenAI-compatible stream — pass through
       return new Response(response.body, {
         headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
       });

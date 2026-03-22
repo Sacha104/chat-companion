@@ -18,6 +18,7 @@ const ALL_PROVIDERS: AiSuggestion[] = [
   { provider: "stability", label: "Stability AI", description: "Génération d'images HD", icon: <Image className="h-4 w-4" />, type: "image" },
   { provider: "deepai", label: "DeepAI", description: "Images rapides", icon: <Image className="h-4 w-4" />, type: "image" },
   { provider: "runwayml", label: "RunwayML", description: "Vidéo & animation", icon: <Video className="h-4 w-4" />, type: "video" },
+  { provider: "kling", label: "Kling AI", description: "Vidéo IA avancée", icon: <Video className="h-4 w-4" />, type: "video" },
 ];
 
 // Detect which providers are most relevant for a prompt

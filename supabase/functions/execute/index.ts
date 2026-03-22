@@ -106,6 +106,19 @@ const PROVIDERS: Record<string, {
     authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
     stream: true,
   },
+  kling: {
+    envKey: "KLING_API_KEY",
+    type: "video",
+    url: "https://api.klingai.com/v1/videos/text2video",
+    buildBody: (prompt) => ({
+      prompt,
+      duration: 5,
+      aspect_ratio: "16:9",
+    }),
+    authHeader: (key) => ({ Authorization: `Bearer ${key}`, "Content-Type": "application/json" }),
+    stream: false,
+    parseResponse: (data: any) => ({ type: "video", taskId: data.data?.task_id, status: data.data?.task_status }),
+  },
 };
 
 serve(async (req) => {

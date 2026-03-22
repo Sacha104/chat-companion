@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Wand2, Code, Image, Video, Type, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface AiSuggestion {
   provider: string;
@@ -75,6 +77,7 @@ function suggestProviders(prompt: string): AiSuggestion[] {
 interface PromptExecutorProps {
   prompt: string;
   onExecutionResult: (result: ExecutionResult) => void;
+  onCreditsChanged?: () => void;
 }
 
 export interface ExecutionResult {
@@ -87,7 +90,7 @@ export interface ExecutionResult {
 
 const EXECUTE_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/execute`;
 
-const PromptExecutor = ({ prompt, onExecutionResult }: PromptExecutorProps) => {
+const PromptExecutor = ({ prompt, onExecutionResult, onCreditsChanged }: PromptExecutorProps) => {
   const [executing, setExecuting] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
 
@@ -98,17 +101,30 @@ const PromptExecutor = ({ prompt, onExecutionResult }: PromptExecutorProps) => {
     setExecuting(true);
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      if (!token) {
+        toast.error("Vous devez être connecté pour exécuter une requête.");
+        setExecuting(false);
+        return;
+      }
+
       const resp = await fetch(EXECUTE_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ prompt, provider: suggestion.provider }),
       });
 
       if (!resp.ok) {
         const err = await resp.json().catch(() => ({ error: "Erreur inconnue" }));
+        if (resp.status === 402) {
+          toast.error("Crédits insuffisants ! Rechargez vos crédits pour continuer.");
+          setExecuting(false);
+          return;
+        }
         throw new Error(err.error || `Erreur ${resp.status}`);
       }
 
@@ -172,6 +188,7 @@ const PromptExecutor = ({ prompt, onExecutionResult }: PromptExecutorProps) => {
       });
     } finally {
       setExecuting(false);
+      onCreditsChanged?.();
     }
   };
 

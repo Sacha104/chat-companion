@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sparkles, PanelLeftClose, PanelLeft, Zap, Copy, Check, LogOut, Code, Image as ImageIcon } from "lucide-react";
+import { Sparkles, PanelLeftClose, PanelLeft, Zap, Copy, Check, LogOut, Code, Image as ImageIcon, Coins } from "lucide-react";
 import { toast } from "sonner";
 import ChatSidebar from "@/components/ChatSidebar";
 import ChatInput from "@/components/ChatInput";
 import PromptExecutor, { type ExecutionResult } from "@/components/PromptExecutor";
 import { useAuth } from "@/hooks/useAuth";
+import { useCredits } from "@/hooks/useCredits";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
@@ -43,6 +44,7 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
 
 const Chat = () => {
   const { user, signOut } = useAuth();
+  const { credits, refetch: refetchCredits } = useCredits();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -242,6 +244,10 @@ const Chat = () => {
             {sidebarOpen ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeft className="h-4 w-4" />}
           </button>
           <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 rounded-lg bg-secondary px-3 py-1.5 text-xs font-semibold text-muted-foreground">
+              <Coins className="h-3.5 w-3.5 text-amber-500" />
+              <span>{credits ?? "–"}</span>
+            </div>
             <button
               onClick={() => navigate("/pricing")}
               className="flex items-center gap-1.5 rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-primary/20 active:scale-[0.96]"
@@ -302,6 +308,7 @@ const Chat = () => {
                             <PromptExecutor
                               prompt={msg.content}
                               onExecutionResult={(result) => handleExecutionResult(msg.id, result)}
+                              onCreditsChanged={refetchCredits}
                             />
 
                             {/* Execution result */}

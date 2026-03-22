@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
-import { Sparkles, PanelLeftClose, PanelLeft, Zap, Copy, Check, LogOut } from "lucide-react";
+import { Sparkles, PanelLeftClose, PanelLeft, Zap, Copy, Check, LogOut, Code, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import ChatSidebar from "@/components/ChatSidebar";
 import ChatInput from "@/components/ChatInput";
+import PromptExecutor, { type ExecutionResult } from "@/components/PromptExecutor";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -10,6 +11,7 @@ interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
+  isPrompt?: boolean; // marks an assistant message as a generated prompt
 }
 
 interface Conversation {
@@ -45,8 +47,10 @@ const Chat = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  // Execution state
+  const [executionResults, setExecutionResults] = useState<Record<string, ExecutionResult>>({});
+  const [executingMsgId, setExecutingMsgId] = useState<string | null>(null);
 
-  // Load conversations
   const loadConversations = useCallback(async () => {
     if (!user) return;
     const { data } = await supabase
@@ -60,9 +64,10 @@ const Chat = () => {
     loadConversations();
   }, [loadConversations]);
 
-  // Load messages when selecting a conversation
   const handleSelectConversation = async (id: string) => {
     setActiveConvId(id);
+    setExecutionResults({});
+    setExecutingMsgId(null);
     const { data } = await supabase
       .from("messages")
       .select("id, role, content")
@@ -71,7 +76,6 @@ const Chat = () => {
     if (data) setMessages(data.map(m => ({ ...m, role: m.role as "user" | "assistant" })));
   };
 
-  // Create a new conversation
   const createConversation = async (title: string): Promise<string | null> => {
     if (!user) return null;
     const { data, error } = await supabase
@@ -79,14 +83,10 @@ const Chat = () => {
       .insert({ user_id: user.id, title: title.slice(0, 80) })
       .select("id")
       .single();
-    if (error) {
-      console.error("Error creating conversation:", error);
-      return null;
-    }
+    if (error) { console.error("Error creating conversation:", error); return null; }
     return data.id;
   };
 
-  // Save a message to the DB
   const saveMessage = async (conversationId: string, role: string, content: string) => {
     if (!user) return;
     await supabase.from("messages").insert({
@@ -102,33 +102,29 @@ const Chat = () => {
     const updatedMessages = [...messages, userMsg];
     setMessages(updatedMessages);
     setIsLoading(true);
+    setExecutionResults({});
+    setExecutingMsgId(null);
 
     let convId = activeConvId;
-
-    // Create conversation if new
     if (!convId) {
       convId = await createConversation(content);
-      if (!convId) {
-        toast.error("Erreur lors de la création de la conversation");
-        setIsLoading(false);
-        return;
-      }
+      if (!convId) { toast.error("Erreur lors de la création de la conversation"); setIsLoading(false); return; }
       setActiveConvId(convId);
     }
 
-    // Save user message
     await saveMessage(convId, "user", content);
 
     let assistantSoFar = "";
+    let assistantMsgId = (Date.now() + 1).toString();
 
     const upsertAssistant = (chunk: string) => {
       assistantSoFar += chunk;
       setMessages((prev) => {
         const last = prev[prev.length - 1];
-        if (last?.role === "assistant") {
+        if (last?.role === "assistant" && last.id === assistantMsgId) {
           return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantSoFar } : m));
         }
-        return [...prev, { id: (Date.now() + 1).toString(), role: "assistant", content: assistantSoFar }];
+        return [...prev, { id: assistantMsgId, role: "assistant", content: assistantSoFar, isPrompt: true }];
       });
     };
 
@@ -149,7 +145,6 @@ const Chat = () => {
         const err = await resp.json().catch(() => ({ error: "Erreur inconnue" }));
         throw new Error(err.error || `Erreur ${resp.status}`);
       }
-
       if (!resp.body) throw new Error("Pas de stream");
 
       const reader = resp.body.getReader();
@@ -160,7 +155,6 @@ const Chat = () => {
         const { done, value } = await reader.read();
         if (done) break;
         buffer += decoder.decode(value, { stream: true });
-
         let newlineIndex: number;
         while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
           let line = buffer.slice(0, newlineIndex);
@@ -180,40 +174,38 @@ const Chat = () => {
         }
       }
 
-      // Save assistant message
       if (assistantSoFar) {
         await saveMessage(convId, "assistant", assistantSoFar);
-        // Update conversation title on first exchange
-        if (updatedMessages.length === 1) {
-          await supabase
-            .from("conversations")
-            .update({ title: content.slice(0, 80), updated_at: new Date().toISOString() })
-            .eq("id", convId);
-        } else {
-          await supabase
-            .from("conversations")
-            .update({ updated_at: new Date().toISOString() })
-            .eq("id", convId);
-        }
+        await supabase
+          .from("conversations")
+          .update({
+            title: updatedMessages.length === 1 ? content.slice(0, 80) : undefined,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", convId);
         loadConversations();
       }
     } catch (e: any) {
       console.error("Chat error:", e);
       toast.error(e.message || "Erreur lors de la communication avec l'IA");
-      if (!assistantSoFar) {
-        setMessages((prev) => prev.filter((m) => m.id !== userMsg.id));
-      }
+      if (!assistantSoFar) setMessages((prev) => prev.filter((m) => m.id !== userMsg.id));
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleExecutionResult = (msgId: string, result: ExecutionResult) => {
+    setExecutingMsgId(msgId);
+    setExecutionResults((prev) => ({ ...prev, [msgId]: result }));
+  };
+
   const handleNewChat = () => {
     setMessages([]);
     setActiveConvId(null);
+    setExecutionResults({});
+    setExecutingMsgId(null);
   };
 
-  // Format conversations for sidebar
   const now = new Date();
   const todayStr = now.toDateString();
   const yesterday = new Date(now);
@@ -272,7 +264,7 @@ const Chat = () => {
                 Décrivez ce que vous voulez
               </h2>
               <p className="mt-2 text-sm text-muted-foreground max-w-xs text-center">
-                Je génère un prompt optimisé prêt à copier-coller dans n'importe quelle IA.
+                Je génère un prompt optimisé, puis vous pouvez l'exécuter directement avec l'IA de votre choix.
               </p>
             </div>
           ) : (
@@ -290,11 +282,68 @@ const Chat = () => {
                       <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                         <Sparkles className="h-3.5 w-3.5 text-primary" />
                       </div>
-                      <div className="group/msg relative max-w-[85%] rounded-2xl rounded-tl-md bg-chat-ai px-4 py-2.5 text-sm text-foreground leading-relaxed">
-                        <pre className="whitespace-pre-wrap font-[inherit]">{msg.content}</pre>
-                        {!isLoading && <CopyButton text={msg.content} />}
-                        {isLoading && msg === messages[messages.length - 1] && (
-                          <span className="ml-1 inline-block h-3 w-1.5 animate-pulse rounded-full bg-primary/60" />
+                      <div className="flex-1 min-w-0">
+                        <div className="group/msg relative max-w-[85%] rounded-2xl rounded-tl-md bg-chat-ai px-4 py-2.5 text-sm text-foreground leading-relaxed">
+                          <pre className="whitespace-pre-wrap font-[inherit]">{msg.content}</pre>
+                          {!isLoading && <CopyButton text={msg.content} />}
+                          {isLoading && msg === messages[messages.length - 1] && (
+                            <span className="ml-1 inline-block h-3 w-1.5 animate-pulse rounded-full bg-primary/60" />
+                          )}
+                        </div>
+
+                        {/* Show AI execution panel after prompt is done generating */}
+                        {msg.role === "assistant" && !isLoading && (
+                          <>
+                            <PromptExecutor
+                              prompt={msg.content}
+                              onExecutionResult={(result) => handleExecutionResult(msg.id, result)}
+                            />
+
+                            {/* Execution result */}
+                            {executionResults[msg.id] && (
+                              <div className="mt-3 animate-fade-up">
+                                <div className="rounded-xl border border-border bg-card p-4">
+                                  <div className="flex items-center gap-2 mb-2 text-xs font-semibold text-muted-foreground">
+                                    {executionResults[msg.id].type === "image" ? (
+                                      <ImageIcon className="h-3.5 w-3.5" />
+                                    ) : executionResults[msg.id].type === "code" ? (
+                                      <Code className="h-3.5 w-3.5" />
+                                    ) : (
+                                      <Sparkles className="h-3.5 w-3.5" />
+                                    )}
+                                    Résultat — {executionResults[msg.id].provider}
+                                  </div>
+
+                                  {/* Image result */}
+                                  {executionResults[msg.id].type === "image" && (
+                                    <div className="rounded-lg overflow-hidden">
+                                      <img
+                                        src={executionResults[msg.id].imageData || executionResults[msg.id].imageUrl}
+                                        alt="Generated"
+                                        className="max-w-full rounded-lg"
+                                      />
+                                    </div>
+                                  )}
+
+                                  {/* Text result */}
+                                  {(executionResults[msg.id].type === "text" || executionResults[msg.id].type === "code") && (
+                                    <div className="group/result relative">
+                                      <pre className={`whitespace-pre-wrap text-sm leading-relaxed ${
+                                        executionResults[msg.id].type === "code"
+                                          ? "bg-secondary/50 rounded-lg p-3 font-mono text-xs overflow-x-auto"
+                                          : "font-[inherit]"
+                                      }`}>
+                                        {executionResults[msg.id].content}
+                                      </pre>
+                                      {executionResults[msg.id].content && (
+                                        <CopyButton text={executionResults[msg.id].content!} />
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </>
                         )}
                       </div>
                     </div>

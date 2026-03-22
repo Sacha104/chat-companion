@@ -92,7 +92,7 @@ const ChatSidebar = ({ conversations, activeId, onSelect, onNewChat, isOpen }: C
                 Notre société
               </button>
               <button
-                onClick={() => setMenuOpen(false)}
+                onClick={() => { setMenuOpen(false); navigate("/our-ais"); }}
                 className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-popover-foreground hover:bg-secondary transition-colors active:scale-[0.97]"
               >
                 <Bot className="h-4 w-4 text-muted-foreground" />

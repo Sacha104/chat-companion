@@ -133,17 +133,36 @@ const Chat = () => {
     };
 
     try {
+      // Check credits before sending
+      if (credits !== null && credits < 1) {
+        toast.error("Crédits insuffisants. Rechargez vos crédits pour continuer.");
+        setMessages((prev) => prev.filter((m) => m.id !== userMsg.id));
+        setIsLoading(false);
+        return;
+      }
+
+      const session = await supabase.auth.getSession();
+      const accessToken = session.data.session?.access_token;
+
       const resp = await fetch(CHAT_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${accessToken || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
         body: JSON.stringify({
           messages: updatedMessages.map((m) => ({ role: m.role, content: m.content })),
           provider: "openai",
         }),
       });
+
+      if (resp.status === 402) {
+        toast.error("Crédits insuffisants. Rechargez vos crédits pour continuer.");
+        setMessages((prev) => prev.filter((m) => m.id !== userMsg.id));
+        setIsLoading(false);
+        refetchCredits();
+        return;
+      }
 
       if (!resp.ok) {
         const err = await resp.json().catch(() => ({ error: "Erreur inconnue" }));

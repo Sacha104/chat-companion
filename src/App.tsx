@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Chat from "./pages/Chat";
 import Pricing from "./pages/Pricing";
+import OurAIs from "./pages/OurAIs";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();

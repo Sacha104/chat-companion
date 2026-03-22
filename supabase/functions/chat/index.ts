@@ -22,6 +22,66 @@ const PROVIDERS: Record<
     authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
     stream: true,
   },
+  anthropic: {
+    envKey: "ANTHROPIC_API_KEY",
+    url: "https://api.anthropic.com/v1/messages",
+    buildBody: (messages, model) => {
+      const system = messages.find((m: any) => m.role === "system")?.content ?? "";
+      const filtered = messages.filter((m: any) => m.role !== "system");
+      return {
+        model: model ?? "claude-sonnet-4-20250514",
+        max_tokens: 4096,
+        system,
+        messages: filtered,
+        stream: true,
+      };
+    },
+    authHeader: (key) => ({ "x-api-key": key, "anthropic-version": "2023-06-01" }),
+    stream: true,
+  },
+  gemini: {
+    envKey: "GEMINI_API_KEY",
+    url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+    buildBody: (messages, model) => ({
+      model: model ?? "gemini-2.0-flash",
+      messages,
+      stream: true,
+    }),
+    authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
+    stream: true,
+  },
+  mistral: {
+    envKey: "MISTRAL_API_KEY",
+    url: "https://api.mistral.ai/v1/chat/completions",
+    buildBody: (messages, model) => ({
+      model: model ?? "mistral-small-latest",
+      messages,
+      stream: true,
+    }),
+    authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
+    stream: true,
+  },
+  deepseek: {
+    envKey: "DEEPSEEK_API_KEY",
+    url: "https://api.deepseek.com/chat/completions",
+    buildBody: (messages, model) => ({
+      model: model ?? "deepseek-coder",
+      messages,
+      stream: true,
+    }),
+    authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
+    stream: true,
+  },
+  stability: {
+    envKey: "STABILITY_API_KEY",
+    url: "https://api.stability.ai/v2beta/stable-image/generate/sd3",
+    buildBody: (messages) => ({
+      prompt: messages.map((m: any) => m.content).join("\n"),
+      output_format: "png",
+    }),
+    authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
+    stream: false,
+  },
   runwayml: {
     envKey: "RUNWAYML_API_KEY",
     url: "https://api.dev.runwayml.com/v1/chat/completions",
@@ -43,7 +103,6 @@ const PROVIDERS: Record<
     stream: false,
   },
 };
-
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -113,7 +172,49 @@ Règles :
     }
 
     if (cfg.stream) {
-      // Stream SSE response through
+      if (provider === "anthropic") {
+        // Transform Anthropic SSE to OpenAI-compatible SSE
+        const reader = response.body!.getReader();
+        const decoder = new TextDecoder();
+        const encoder = new TextEncoder();
+        const stream = new ReadableStream({
+          async pull(controller) {
+            let buf = "";
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) {
+                controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+                controller.close();
+                return;
+              }
+              buf += decoder.decode(value, { stream: true });
+              let idx;
+              while ((idx = buf.indexOf("\n")) !== -1) {
+                const line = buf.slice(0, idx).trim();
+                buf = buf.slice(idx + 1);
+                if (!line.startsWith("data: ")) continue;
+                const json = line.slice(6);
+                if (json === "[DONE]") {
+                  controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+                  controller.close();
+                  return;
+                }
+                try {
+                  const evt = JSON.parse(json);
+                  if (evt.type === "content_block_delta" && evt.delta?.text) {
+                    const normalized = { choices: [{ delta: { content: evt.delta.text } }] };
+                    controller.enqueue(encoder.encode(`data: ${JSON.stringify(normalized)}\n\n`));
+                  }
+                } catch { /* skip */ }
+              }
+            }
+          },
+        });
+        return new Response(stream, {
+          headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+        });
+      }
+      // OpenAI-compatible stream — pass through
       return new Response(response.body, {
         headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
       });

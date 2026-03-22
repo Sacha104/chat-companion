@@ -13,6 +13,7 @@ import OurAIs from "./pages/OurAIs";
 import Company from "./pages/Company";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();

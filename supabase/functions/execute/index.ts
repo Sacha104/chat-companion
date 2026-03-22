@@ -106,6 +106,19 @@ const PROVIDERS: Record<string, {
     authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
     stream: true,
   },
+  kling: {
+    envKey: "KLING_API_KEY",
+    type: "video",
+    url: "https://api.klingai.com/v1/videos/text2video",
+    buildBody: (prompt) => ({
+      prompt,
+      duration: 5,
+      aspect_ratio: "16:9",
+    }),
+    authHeader: (key) => ({ Authorization: `Bearer ${key}`, "Content-Type": "application/json" }),
+    stream: false,
+    parseResponse: (data: any) => ({ type: "video", taskId: data.data?.task_id, status: data.data?.task_status }),
+  },
 };
 
 serve(async (req) => {
@@ -182,7 +195,29 @@ serve(async (req) => {
         return new Response(JSON.stringify({ error: `DeepAI API error: ${response.status}` }), {
           status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
+    }
+
+    // Kling AI video generation
+    if (provider === "kling") {
+      const response = await fetch(cfg.url, {
+        method: "POST",
+        headers: { ...cfg.authHeader(apiKey) },
+        body: JSON.stringify(cfg.buildBody(prompt)),
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        console.error(`kling API error [${response.status}]:`, errText);
+        return new Response(JSON.stringify({ error: `Kling AI API error: ${response.status}` }), {
+          status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
+
+      const data = await response.json();
+      return new Response(JSON.stringify({ type: "video", taskId: data.data?.task_id, status: data.data?.task_status }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
       const data = await response.json();
       return new Response(JSON.stringify({ type: "image", url: data.output_url }), {

@@ -75,6 +75,7 @@ function suggestProviders(prompt: string): AiSuggestion[] {
 interface PromptExecutorProps {
   prompt: string;
   onExecutionResult: (result: ExecutionResult) => void;
+  onCreditsChanged?: () => void;
 }
 
 export interface ExecutionResult {

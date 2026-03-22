@@ -10,6 +10,9 @@ import Login from "./pages/Login";
 import Chat from "./pages/Chat";
 import Pricing from "./pages/Pricing";
 import OurAIs from "./pages/OurAIs";
+import Company from "./pages/Company";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();

@@ -207,6 +207,7 @@ const Chat = () => {
           })
           .eq("id", convId);
         loadConversations();
+        refetchCredits();
       }
     } catch (e: any) {
       console.error("Chat error:", e);

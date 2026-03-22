@@ -1,19 +1,53 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import { Sparkles, ArrowRight } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-muted border-t-primary" />
+      </div>
+    );
+  }
+
+  if (user) {
+    return <Navigate to="/chat" replace />;
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => {
-      navigate("/chat");
-    }, 600);
+
+    try {
+      if (isSignUp) {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { emailRedirectTo: window.location.origin },
+        });
+        if (error) throw error;
+        toast.success("Vérifiez votre email pour confirmer votre compte");
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        navigate("/chat");
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Erreur d'authentification");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -27,7 +61,7 @@ const Login = () => {
             Bienvenue
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Connectez-vous pour continuer
+            {isSignUp ? "Créez votre compte" : "Connectez-vous pour continuer"}
           </p>
         </div>
 
@@ -57,6 +91,7 @@ const Login = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              minLength={6}
               className="w-full rounded-lg border border-border bg-card px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-shadow"
               placeholder="••••••••"
             />
@@ -71,7 +106,7 @@ const Login = () => {
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground" />
             ) : (
               <>
-                Se connecter
+                {isSignUp ? "Créer un compte" : "Se connecter"}
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </>
             )}
@@ -79,8 +114,13 @@ const Login = () => {
         </form>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          Pas encore de compte ?{" "}
-          <button className="text-primary hover:underline">Créer un compte</button>
+          {isSignUp ? "Déjà un compte ?" : "Pas encore de compte ?"}{" "}
+          <button
+            onClick={() => setIsSignUp(!isSignUp)}
+            className="text-primary hover:underline"
+          >
+            {isSignUp ? "Se connecter" : "Créer un compte"}
+          </button>
         </p>
       </div>
     </div>

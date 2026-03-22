@@ -22,6 +22,66 @@ const PROVIDERS: Record<
     authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
     stream: true,
   },
+  anthropic: {
+    envKey: "ANTHROPIC_API_KEY",
+    url: "https://api.anthropic.com/v1/messages",
+    buildBody: (messages, model) => {
+      const system = messages.find((m: any) => m.role === "system")?.content ?? "";
+      const filtered = messages.filter((m: any) => m.role !== "system");
+      return {
+        model: model ?? "claude-sonnet-4-20250514",
+        max_tokens: 4096,
+        system,
+        messages: filtered,
+        stream: true,
+      };
+    },
+    authHeader: (key) => ({ "x-api-key": key, "anthropic-version": "2023-06-01" }),
+    stream: true,
+  },
+  gemini: {
+    envKey: "GEMINI_API_KEY",
+    url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+    buildBody: (messages, model) => ({
+      model: model ?? "gemini-2.0-flash",
+      messages,
+      stream: true,
+    }),
+    authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
+    stream: true,
+  },
+  mistral: {
+    envKey: "MISTRAL_API_KEY",
+    url: "https://api.mistral.ai/v1/chat/completions",
+    buildBody: (messages, model) => ({
+      model: model ?? "mistral-small-latest",
+      messages,
+      stream: true,
+    }),
+    authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
+    stream: true,
+  },
+  deepseek: {
+    envKey: "DEEPSEEK_API_KEY",
+    url: "https://api.deepseek.com/chat/completions",
+    buildBody: (messages, model) => ({
+      model: model ?? "deepseek-coder",
+      messages,
+      stream: true,
+    }),
+    authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
+    stream: true,
+  },
+  stability: {
+    envKey: "STABILITY_API_KEY",
+    url: "https://api.stability.ai/v2beta/stable-image/generate/sd3",
+    buildBody: (messages) => ({
+      prompt: messages.map((m: any) => m.content).join("\n"),
+      output_format: "png",
+    }),
+    authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
+    stream: false,
+  },
   runwayml: {
     envKey: "RUNWAYML_API_KEY",
     url: "https://api.dev.runwayml.com/v1/chat/completions",
@@ -43,7 +103,6 @@ const PROVIDERS: Record<
     stream: false,
   },
 };
-
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 

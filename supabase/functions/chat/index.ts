@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -114,6 +115,41 @@ serve(async (req) => {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // --- Credit check (1 credit per prompt generation) ---
+    const authHeader = req.headers.get("Authorization");
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+    let userId: string | null = null;
+    if (authHeader) {
+      const token = authHeader.replace("Bearer ", "");
+      const supabaseUser = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_ANON_KEY")!,
+        { global: { headers: { Authorization: `Bearer ${token}` } } },
+      );
+      const { data: { user } } = await supabaseUser.auth.getUser();
+      userId = user?.id ?? null;
+    }
+
+    if (userId) {
+      const { error: creditError } = await supabaseAdmin.rpc("deduct_credits", {
+        p_user_id: userId,
+        p_amount: 1,
+      });
+      if (creditError) {
+        const msg = creditError.message || "";
+        if (msg.includes("INSUFFICIENT_CREDITS")) {
+          return new Response(JSON.stringify({ error: "Crédits insuffisants. Rechargez vos crédits pour continuer." }), {
+            status: 402,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        console.error("Credit deduction error:", creditError);
+      }
     }
 
     const cfg = PROVIDERS[provider];

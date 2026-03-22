@@ -38,7 +38,10 @@ function suggestProviders(prompt: string): AiSuggestion[] {
   }
 
   if (hasVideo) {
-    suggestions.push(ALL_PROVIDERS.find(p => p.provider === "runwayml")!);
+    suggestions.push(
+      ALL_PROVIDERS.find(p => p.provider === "runwayml")!,
+      ALL_PROVIDERS.find(p => p.provider === "kling")!,
+    );
   }
 
   if (hasCode) {

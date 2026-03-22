@@ -120,7 +120,10 @@ const ChatSidebar = ({ conversations, activeId, onSelect, onNewChat, isOpen }: C
 
       {/* User / Settings */}
       <div className="border-t border-sidebar-border p-3">
-        <button className="group flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-sidebar-fg transition-colors hover:bg-sidebar-hover active:scale-[0.97]">
+        <button
+          onClick={() => navigate("/settings")}
+          className="group flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-sidebar-fg transition-colors hover:bg-sidebar-hover active:scale-[0.97]"
+        >
           <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/15 text-primary">
             <User className="h-3.5 w-3.5" />
           </div>

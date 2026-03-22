@@ -19,6 +19,7 @@ interface ChatSidebarProps {
 const ChatSidebar = ({ conversations, activeId, onSelect, onNewChat, isOpen }: ChatSidebarProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {

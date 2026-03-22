@@ -6,7 +6,6 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Provider configs for EXECUTION (not prompt generation)
 const PROVIDERS: Record<string, {
   envKey: string;
   type: "chat" | "image" | "video";
@@ -14,7 +13,6 @@ const PROVIDERS: Record<string, {
   buildBody: (prompt: string, model?: string) => any;
   authHeader: (key: string) => Record<string, string>;
   stream: boolean;
-  parseResponse?: (data: any) => any;
 }> = {
   openai: {
     envKey: "OPENAI_API_KEY",
@@ -92,19 +90,21 @@ const PROVIDERS: Record<string, {
     buildBody: (prompt) => ({ text: prompt }),
     authHeader: (key) => ({ "api-key": key }),
     stream: false,
-    parseResponse: (data: any) => ({ type: "image", url: data.output_url }),
   },
   runwayml: {
     envKey: "RUNWAYML_API_KEY",
     type: "video",
-    url: "https://api.dev.runwayml.com/v1/chat/completions",
-    buildBody: (prompt, model) => ({
-      model: model ?? "runway",
-      messages: [{ role: "user", content: prompt }],
-      stream: true,
+    url: "https://api.dev.runwayml.com/v1/image_to_video",
+    buildBody: (prompt) => ({
+      promptText: prompt,
+      model: "gen3a_turbo",
+      duration: 5,
     }),
-    authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
-    stream: true,
+    authHeader: (key) => ({
+      Authorization: `Bearer ${key}`,
+      "X-Runway-Version": "2024-11-06",
+    }),
+    stream: false,
   },
   kling: {
     envKey: "KLING_API_KEY",
@@ -115,9 +115,8 @@ const PROVIDERS: Record<string, {
       duration: 5,
       aspect_ratio: "16:9",
     }),
-    authHeader: (key) => ({ Authorization: `Bearer ${key}`, "Content-Type": "application/json" }),
+    authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
     stream: false,
-    parseResponse: (data: any) => ({ type: "video", taskId: data.data?.task_id, status: data.data?.task_status }),
   },
 };
 
@@ -150,8 +149,8 @@ serve(async (req) => {
       );
     }
 
-    // For image providers that return binary
-    if (cfg.type === "image" && provider === "stability") {
+    // Stability AI (binary image response)
+    if (provider === "stability") {
       const formData = new FormData();
       formData.append("prompt", prompt);
       formData.append("output_format", "png");
@@ -170,7 +169,6 @@ serve(async (req) => {
         });
       }
 
-      // Return image as base64
       const arrayBuf = await response.arrayBuffer();
       const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuf)));
       return new Response(JSON.stringify({ type: "image", data: `data:image/png;base64,${base64}` }), {
@@ -178,8 +176,8 @@ serve(async (req) => {
       });
     }
 
-    // For DeepAI image
-    if (cfg.type === "image" && provider === "deepai") {
+    // DeepAI image
+    if (provider === "deepai") {
       const formData = new FormData();
       formData.append("text", prompt);
 
@@ -195,13 +193,41 @@ serve(async (req) => {
         return new Response(JSON.stringify({ error: `DeepAI API error: ${response.status}` }), {
           status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
+      }
+
+      const data = await response.json();
+      return new Response(JSON.stringify({ type: "image", url: data.output_url }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // RunwayML video generation
+    if (provider === "runwayml") {
+      const response = await fetch(cfg.url, {
+        method: "POST",
+        headers: { ...cfg.authHeader(apiKey), "Content-Type": "application/json" },
+        body: JSON.stringify(cfg.buildBody(prompt)),
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        console.error(`runwayml API error [${response.status}]:`, errText);
+        return new Response(JSON.stringify({ error: `RunwayML API error: ${response.status}` }), {
+          status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const data = await response.json();
+      return new Response(JSON.stringify({ type: "video", taskId: data.id, status: data.status }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // Kling AI video generation
     if (provider === "kling") {
       const response = await fetch(cfg.url, {
         method: "POST",
-        headers: { ...cfg.authHeader(apiKey) },
+        headers: { ...cfg.authHeader(apiKey), "Content-Type": "application/json" },
         body: JSON.stringify(cfg.buildBody(prompt)),
       });
 
@@ -215,12 +241,6 @@ serve(async (req) => {
 
       const data = await response.json();
       return new Response(JSON.stringify({ type: "video", taskId: data.data?.task_id, status: data.data?.task_status }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-      const data = await response.json();
-      return new Response(JSON.stringify({ type: "image", url: data.output_url }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }

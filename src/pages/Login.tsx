@@ -32,6 +32,11 @@ const Login = () => {
 
     try {
       if (isSignUp) {
+        if (!acceptedTerms) {
+          toast.error("Vous devez accepter les conditions d'utilisation et la politique de confidentialité.");
+          setIsLoading(false);
+          return;
+        }
         const { error } = await supabase.auth.signUp({
           email,
           password,

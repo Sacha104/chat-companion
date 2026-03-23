@@ -59,7 +59,7 @@ const translations = {
   prompts_example_text: { fr: "Je veux un logo minimaliste pour une startup tech", en: "I want a minimalist logo for a tech startup" },
   prompts_optimized: { fr: "Prompt optimisé par Pr@mpt :", en: "Prompt optimized by Pr@mpt:" },
   prompts_optimized_text: {
-    fr: "Create a clean, minimalist logo for a tech startup. Use geometric shapes, a modern sans-serif font, and a limited color palette of 2-3 colors. The design should convey innovation and simplicity. Output as high-resolution PNG with transparent background.",
+    fr: "Crée un logo épuré et minimaliste pour une startup tech. Utilise des formes géométriques, une police sans-serif moderne et une palette limitée de 2 à 3 couleurs. Le design doit évoquer l'innovation et la simplicité. Exporte en PNG haute résolution avec fond transparent.",
     en: "Create a clean, minimalist logo for a tech startup. Use geometric shapes, a modern sans-serif font, and a limited color palette of 2-3 colors. The design should convey innovation and simplicity. Output as high-resolution PNG with transparent background.",
   },
   prompts_suggestion: { fr: "IA suggérée :", en: "Suggested AI:" },
@@ -203,6 +203,18 @@ const translations = {
   // ===== NotFound =====
   notfound_title: { fr: "Page non trouvée", en: "Page not found" },
   notfound_back: { fr: "Retour à l'accueil", en: "Return to Home" },
+
+  // ===== Chat empty state =====
+  chat_empty_title: { fr: "Décrivez ce que vous voulez", en: "Describe what you want" },
+  chat_empty_desc: {
+    fr: "Je génère un prompt optimisé, puis vous pouvez l'exécuter directement avec l'IA de votre choix.",
+    en: "I generate an optimized prompt, then you can execute it directly with the AI of your choice.",
+  },
+  chat_result: { fr: "Résultat", en: "Result" },
+  chat_copied: { fr: "Prompt copié !", en: "Prompt copied!" },
+  chat_no_credits: { fr: "Crédits insuffisants. Rechargez vos crédits pour continuer.", en: "Not enough credits. Top up to continue." },
+  chat_conv_error: { fr: "Erreur lors de la création de la conversation", en: "Error creating conversation" },
+  chat_stream_error: { fr: "Erreur lors de la communication avec l'IA", en: "Error communicating with AI" },
 } as const;
 
 type TranslationKey = keyof typeof translations;

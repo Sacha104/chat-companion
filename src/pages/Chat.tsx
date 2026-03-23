@@ -301,10 +301,10 @@ const Chat = () => {
                 <Sparkles className="h-8 w-8 text-primary" />
               </div>
               <h2 className="text-xl font-semibold text-foreground" style={{ lineHeight: "1.1" }}>
-                Décrivez ce que vous voulez
+                {t("chat_empty_title")}
               </h2>
               <p className="mt-2 text-sm text-muted-foreground max-w-xs text-center">
-                Je génère un prompt optimisé, puis vous pouvez l'exécuter directement avec l'IA de votre choix.
+                {t("chat_empty_desc")}
               </p>
             </div>
           ) : (

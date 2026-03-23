@@ -203,6 +203,18 @@ const translations = {
   // ===== NotFound =====
   notfound_title: { fr: "Page non trouvée", en: "Page not found" },
   notfound_back: { fr: "Retour à l'accueil", en: "Return to Home" },
+
+  // ===== Chat empty state =====
+  chat_empty_title: { fr: "Décrivez ce que vous voulez", en: "Describe what you want" },
+  chat_empty_desc: {
+    fr: "Je génère un prompt optimisé, puis vous pouvez l'exécuter directement avec l'IA de votre choix.",
+    en: "I generate an optimized prompt, then you can execute it directly with the AI of your choice.",
+  },
+  chat_result: { fr: "Résultat", en: "Result" },
+  chat_copied: { fr: "Prompt copié !", en: "Prompt copied!" },
+  chat_no_credits: { fr: "Crédits insuffisants. Rechargez vos crédits pour continuer.", en: "Not enough credits. Top up to continue." },
+  chat_conv_error: { fr: "Erreur lors de la création de la conversation", en: "Error creating conversation" },
+  chat_stream_error: { fr: "Erreur lors de la communication avec l'IA", en: "Error communicating with AI" },
 } as const;
 
 type TranslationKey = keyof typeof translations;

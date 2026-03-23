@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, MessageSquare, Settings, User, Menu, Building2, Bot } from "lucide-react";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface Conversation {
   id: string;
@@ -20,6 +21,7 @@ const ChatSidebar = ({ conversations, activeId, onSelect, onNewChat, isOpen }: C
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -70,7 +72,6 @@ const ChatSidebar = ({ conversations, activeId, onSelect, onNewChat, isOpen }: C
 
   return (
     <aside className="flex h-full w-64 flex-col bg-sidebar-bg border-r border-sidebar-border animate-fade-in">
-      {/* Top actions */}
       <div className="p-3 space-y-2">
         <div className="relative" ref={menuRef}>
           <button
@@ -89,14 +90,14 @@ const ChatSidebar = ({ conversations, activeId, onSelect, onNewChat, isOpen }: C
                 className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-popover-foreground hover:bg-secondary transition-colors active:scale-[0.97]"
               >
                 <Building2 className="h-4 w-4 text-muted-foreground" />
-                Notre société
+                {t("sidebar_company")}
               </button>
               <button
                 onClick={() => { setMenuOpen(false); navigate("/our-ais"); }}
                 className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-popover-foreground hover:bg-secondary transition-colors active:scale-[0.97]"
               >
                 <Bot className="h-4 w-4 text-muted-foreground" />
-                Nos IAs
+                {t("sidebar_our_ais")}
               </button>
             </div>
           )}
@@ -107,18 +108,16 @@ const ChatSidebar = ({ conversations, activeId, onSelect, onNewChat, isOpen }: C
           className="group flex w-full items-center gap-2.5 rounded-lg border border-border/60 px-3 py-2.5 text-sm font-medium text-foreground transition-all hover:bg-sidebar-hover active:scale-[0.97]"
         >
           <Plus className="h-4 w-4 text-primary" />
-          Nouvelle discussion
+          {t("sidebar_new_chat")}
         </button>
       </div>
 
-      {/* History */}
       <div className="flex-1 overflow-y-auto px-2 scrollbar-thin">
-        <Section label="Aujourd'hui" items={grouped.today} />
-        <Section label="Hier" items={grouped.yesterday} />
-        <Section label="Plus ancien" items={grouped.older} />
+        <Section label={t("sidebar_today")} items={grouped.today} />
+        <Section label={t("sidebar_yesterday")} items={grouped.yesterday} />
+        <Section label={t("sidebar_older")} items={grouped.older} />
       </div>
 
-      {/* User / Settings */}
       <div className="border-t border-sidebar-border p-3">
         <button
           onClick={() => navigate("/settings")}
@@ -127,7 +126,7 @@ const ChatSidebar = ({ conversations, activeId, onSelect, onNewChat, isOpen }: C
           <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/15 text-primary">
             <User className="h-3.5 w-3.5" />
           </div>
-          <span className="flex-1 text-left truncate">Mon compte</span>
+          <span className="flex-1 text-left truncate">{t("sidebar_account")}</span>
           <Settings className="h-4 w-4 opacity-40 group-hover:opacity-70 transition-opacity" />
         </button>
       </div>

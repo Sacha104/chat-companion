@@ -9,30 +9,30 @@ const translations = {
 
   // Hero
   hero_badge: { fr: "5 crédits offerts à l'inscription", en: "5 free credits on signup" },
-  hero_title_1: { fr: "Toutes les IA,", en: "Every AI," },
-  hero_title_2: { fr: "un seul endroit.", en: "one place." },
+  hero_title_1: { fr: "Vos prompts,", en: "Your prompts," },
+  hero_title_2: { fr: "optimisés par l'IA.", en: "optimized by AI." },
   hero_desc: {
-    fr: "Accédez à ChatGPT, Claude, Gemini, Grok et bien d'autres depuis une interface unique. Générez du texte, du code, des images et des vidéos sans jongler entre les plateformes.",
-    en: "Access ChatGPT, Claude, Gemini, Grok and many more from a single interface. Generate text, code, images and videos without switching between platforms.",
+    fr: "Pr@mpt génère des prompts optimisés pour chaque IA — ChatGPT, Claude, Gemini, Grok et bien d'autres. Obtenez les meilleurs résultats en texte, code, image et vidéo, automatiquement.",
+    en: "Pr@mpt generates optimized prompts for every AI — ChatGPT, Claude, Gemini, Grok and many more. Get the best results in text, code, image and video, automatically.",
   },
   hero_cta: { fr: "Créer un compte gratuit", en: "Create a free account" },
   hero_discover: { fr: "Découvrir", en: "Discover" },
 
   // Features
-  features_title: { fr: "Pourquoi choisir Chat Companion ?", en: "Why choose Chat Companion?" },
+  features_title: { fr: "Pourquoi choisir Pr@mpt ?", en: "Why choose Pr@mpt?" },
   features_desc: {
-    fr: "Tout ce dont vous avez besoin pour exploiter la puissance de l'IA au quotidien.",
-    en: "Everything you need to harness the power of AI every day.",
+    fr: "Générez des prompts optimisés et exploitez la puissance de l'IA au quotidien.",
+    en: "Generate optimized prompts and harness the power of AI every day.",
   },
-  feat1_title: { fr: "Multi-IA unifié", en: "Unified Multi-AI" },
+  feat1_title: { fr: "Prompts optimisés", en: "Optimized Prompts" },
   feat1_desc: {
-    fr: "Accédez à GPT, Claude, Gemini, Grok et plus encore depuis une seule conversation.",
-    en: "Access GPT, Claude, Gemini, Grok and more from a single conversation.",
+    fr: "Pr@mpt reformule et optimise automatiquement vos demandes pour obtenir les meilleurs résultats de chaque IA.",
+    en: "Pr@mpt automatically rewrites and optimizes your requests to get the best results from every AI.",
   },
-  feat2_title: { fr: "Rapide & simple", en: "Fast & Simple" },
+  feat2_title: { fr: "Multi-IA unifié", en: "Unified Multi-AI" },
   feat2_desc: {
-    fr: "Interface fluide, réponses instantanées. Pas besoin de compte sur chaque plateforme.",
-    en: "Smooth interface, instant responses. No need for an account on each platform.",
+    fr: "Accédez à GPT, Claude, Gemini, Grok et plus encore depuis une seule interface. Pas besoin de compte sur chaque plateforme.",
+    en: "Access GPT, Claude, Gemini, Grok and more from a single interface. No need for an account on each platform.",
   },
   feat3_title: { fr: "Données sécurisées", en: "Secure Data" },
   feat3_desc: {
@@ -41,15 +41,15 @@ const translations = {
   },
 
   // Prompts section
-  prompts_title: { fr: "Des prompts intelligents", en: "Smart Prompts" },
+  prompts_title: { fr: "Des prompts générés et optimisés", en: "Generated & Optimized Prompts" },
   prompts_subtitle: {
-    fr: "Notre système analyse votre demande et vous suggère automatiquement la meilleure IA pour y répondre.",
-    en: "Our system analyzes your request and automatically suggests the best AI to answer it.",
+    fr: "Pr@mpt analyse votre demande, génère un prompt optimisé et sélectionne automatiquement la meilleure IA pour y répondre.",
+    en: "Pr@mpt analyzes your request, generates an optimized prompt and automatically selects the best AI to answer it.",
   },
-  prompts_feat1_title: { fr: "Suggestions automatiques", en: "Auto Suggestions" },
+  prompts_feat1_title: { fr: "Génération automatique", en: "Auto Generation" },
   prompts_feat1_desc: {
-    fr: "Tapez votre prompt et Chat Companion identifie instantanément les IA les plus adaptées : texte, code, image ou vidéo.",
-    en: "Type your prompt and Chat Companion instantly identifies the best-suited AIs: text, code, image or video.",
+    fr: "Décrivez simplement ce que vous voulez. Pr@mpt génère un prompt optimisé et identifie les IA les plus adaptées : texte, code, image ou vidéo.",
+    en: "Simply describe what you want. Pr@mpt generates an optimized prompt and identifies the best-suited AIs: text, code, image or video.",
   },
   prompts_feat2_title: { fr: "Exécution en un clic", en: "One-Click Execution" },
   prompts_feat2_desc: {
@@ -58,11 +58,16 @@ const translations = {
   },
   prompts_feat3_title: { fr: "Tous les formats", en: "All Formats" },
   prompts_feat3_desc: {
-    fr: "Texte, code, images HD, vidéos… un seul prompt suffit pour générer du contenu dans tous les formats.",
-    en: "Text, code, HD images, videos… a single prompt is enough to generate content in every format.",
+    fr: "Texte, code, images HD, vidéos… un seul prompt optimisé suffit pour générer du contenu dans tous les formats.",
+    en: "Text, code, HD images, videos… a single optimized prompt is enough to generate content in every format.",
   },
-  prompts_example: { fr: "Exemple de prompt", en: "Prompt example" },
-  prompts_example_text: { fr: "Génère-moi un logo minimaliste pour une startup tech", en: "Generate a minimalist logo for a tech startup" },
+  prompts_example: { fr: "Votre demande", en: "Your request" },
+  prompts_example_text: { fr: "Je veux un logo minimaliste pour une startup tech", en: "I want a minimalist logo for a tech startup" },
+  prompts_optimized: { fr: "Prompt optimisé par Pr@mpt :", en: "Prompt optimized by Pr@mpt:" },
+  prompts_optimized_text: {
+    fr: "Create a clean, minimalist logo for a tech startup. Use geometric shapes, a modern sans-serif font, and a limited color palette of 2-3 colors. The design should convey innovation and simplicity. Output as high-resolution PNG with transparent background.",
+    en: "Create a clean, minimalist logo for a tech startup. Use geometric shapes, a modern sans-serif font, and a limited color palette of 2-3 colors. The design should convey innovation and simplicity. Output as high-resolution PNG with transparent background.",
+  },
   prompts_suggestion: { fr: "IA suggérée :", en: "Suggested AI:" },
 
   // Pricing
@@ -83,8 +88,8 @@ const translations = {
   // CTA
   cta_title: { fr: "Prêt à essayer ?", en: "Ready to try?" },
   cta_desc: {
-    fr: "Créez votre compte en 30 secondes et recevez 5 crédits offerts pour tester toutes les IA.",
-    en: "Create your account in 30 seconds and receive 5 free credits to test all AIs.",
+    fr: "Créez votre compte en 30 secondes et recevez 5 crédits offerts pour générer vos premiers prompts optimisés.",
+    en: "Create your account in 30 seconds and receive 5 free credits to generate your first optimized prompts.",
   },
   cta_button: { fr: "Commencer maintenant", en: "Start now" },
 

@@ -7,6 +7,7 @@ import ChatInput from "@/components/ChatInput";
 import PromptExecutor, { type ExecutionResult } from "@/components/PromptExecutor";
 import { useAuth } from "@/hooks/useAuth";
 import { useCredits } from "@/hooks/useCredits";
+import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Message {

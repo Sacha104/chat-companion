@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { SendHorizonal } from "lucide-react";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface ChatInputProps {
   onSend: (message: string) => void;
@@ -9,6 +10,7 @@ interface ChatInputProps {
 const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
   const [value, setValue] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -39,7 +41,7 @@ const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Écrivez votre message…"
+          placeholder={t("chat_placeholder")}
           rows={1}
           disabled={disabled}
           className="flex-1 resize-none bg-transparent px-2 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none disabled:opacity-50 scrollbar-thin"
@@ -53,7 +55,7 @@ const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
         </button>
       </div>
       <p className="mt-2 text-center text-[11px] text-muted-foreground/50">
-        L'IA peut faire des erreurs. Vérifiez les informations importantes.
+        {t("chat_disclaimer")}
       </p>
     </div>
   );

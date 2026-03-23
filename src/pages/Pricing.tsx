@@ -4,11 +4,13 @@ import { Check, ArrowLeft, Loader2, Crown } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/hooks/useLanguage";
 import { PLANS, type PlanKey, getPlanByProductId } from "@/lib/plans";
 
 const Pricing = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState<PlanKey | null>(null);
   const [currentProductId, setCurrentProductId] = useState<string | null>(null);
   const [checkingSubscription, setCheckingSubscription] = useState(true);
@@ -37,20 +39,20 @@ const Pricing = () => {
       if (error) throw error;
       if (data?.url) window.open(data.url, "_blank");
     } catch (e: any) {
-      toast.error(e.message || "Erreur lors de la création du paiement");
+      toast.error(e.message || "Error");
     } finally {
       setLoading(null);
     }
   };
 
   const handleManage = async () => {
-    setLoading("starter"); // reuse loading state
+    setLoading("starter");
     try {
       const { data, error } = await supabase.functions.invoke("customer-portal");
       if (error) throw error;
       if (data?.url) window.open(data.url, "_blank");
     } catch (e: any) {
-      toast.error(e.message || "Erreur");
+      toast.error(e.message || "Error");
     } finally {
       setLoading(null);
     }
@@ -61,17 +63,11 @@ const Pricing = () => {
   const plans: { key: PlanKey; features: string[] }[] = [
     {
       key: "starter",
-      features: ["100 crédits / mois", "Tous les providers IA", "Historique illimité", "Support email"],
+      features: [t("pricing_starter_f1"), t("pricing_feat_providers"), t("pricing_feat_history"), t("pricing_feat_email")],
     },
     {
       key: "pro",
-      features: [
-        "300 crédits / mois",
-        "Tous les providers IA",
-        "Historique illimité",
-        "Support prioritaire",
-        "Accès anticipé aux nouveautés",
-      ],
+      features: [t("pricing_pro_f1"), t("pricing_feat_providers"), t("pricing_feat_history"), t("pricing_feat_priority"), t("pricing_feat_early")],
     },
   ];
 
@@ -84,7 +80,7 @@ const Pricing = () => {
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
-        <h1 className="text-lg font-semibold text-foreground">Choisissez votre plan</h1>
+        <h1 className="text-lg font-semibold text-foreground">{t("pricing_page_title")}</h1>
       </header>
 
       <div className="flex-1 flex items-center justify-center px-4 py-12">
@@ -98,26 +94,24 @@ const Pricing = () => {
               <div
                 key={key}
                 className={`relative rounded-2xl border p-6 flex flex-col transition-shadow hover:shadow-lg ${
-                  isPopular
-                    ? "border-primary shadow-md shadow-primary/10"
-                    : "border-border"
+                  isPopular ? "border-primary shadow-md shadow-primary/10" : "border-border"
                 } ${isCurrent ? "ring-2 ring-primary/40" : ""}`}
               >
                 {isPopular && (
                   <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-0.5 text-[11px] font-semibold text-primary-foreground">
-                    Populaire
+                    {t("pricing_popular")}
                   </span>
                 )}
                 {isCurrent && (
                   <span className="absolute -top-3 right-4 rounded-full bg-primary px-3 py-0.5 text-[11px] font-semibold text-primary-foreground flex items-center gap-1">
-                    <Crown className="h-3 w-3" /> Actuel
+                    <Crown className="h-3 w-3" /> {t("pricing_current")}
                   </span>
                 )}
 
                 <h2 className="text-xl font-bold text-foreground">{plan.name}</h2>
                 <div className="mt-3 flex items-baseline gap-1">
                   <span className="text-4xl font-extrabold tracking-tight text-foreground">{plan.price}€</span>
-                  <span className="text-sm text-muted-foreground">/mois</span>
+                  <span className="text-sm text-muted-foreground">{t("pricing_month")}</span>
                 </div>
 
                 <ul className="mt-6 space-y-3 flex-1">
@@ -141,9 +135,9 @@ const Pricing = () => {
                   {loading === key ? (
                     <Loader2 className="h-4 w-4 animate-spin mx-auto" />
                   ) : isCurrent ? (
-                    "Gérer l'abonnement"
+                    t("pricing_manage")
                   ) : (
-                    "S'abonner"
+                    t("pricing_subscribe")
                   )}
                 </button>
               </div>

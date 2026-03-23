@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Sparkles, Zap, Shield, MessageSquare, ArrowRight, Bot, Star, Check, Wand2, Code, Image, Globe } from "lucide-react";
+import { Sparkles, Zap, Shield, MessageSquare, ArrowRight, Bot, Star, Check, Wand2, Code, Image, Globe, PenTool } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/hooks/useLanguage";
 
@@ -14,7 +14,7 @@ const Landing = () => {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-2">
             <Sparkles className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold tracking-tight">Chat Companion</span>
+            <span className="text-xl font-bold tracking-tight">Pr@mpt</span>
           </div>
           <div className="flex items-center gap-3">
             <button
@@ -88,8 +88,8 @@ const Landing = () => {
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { icon: MessageSquare, title: t("feat1_title"), desc: t("feat1_desc") },
-              { icon: Zap, title: t("feat2_title"), desc: t("feat2_desc") },
+              { icon: PenTool, title: t("feat1_title"), desc: t("feat1_desc") },
+              { icon: MessageSquare, title: t("feat2_title"), desc: t("feat2_desc") },
               { icon: Shield, title: t("feat3_title"), desc: t("feat3_desc") },
             ].map(({ icon: Icon, title, desc }) => (
               <div
@@ -141,12 +141,21 @@ const Landing = () => {
               <div className="rounded-xl bg-secondary/60 border border-border p-4 mb-4">
                 <p className="text-sm text-foreground">{t("prompts_example_text")}</p>
               </div>
+              
+              <p className="text-xs font-medium text-primary mb-3 uppercase tracking-wider flex items-center gap-1.5">
+                <Wand2 className="h-3 w-3" />
+                {t("prompts_optimized")}
+              </p>
+              <div className="rounded-xl bg-primary/5 border border-primary/20 p-4 mb-4">
+                <p className="text-xs text-foreground/80 font-mono leading-relaxed">{t("prompts_optimized_text")}</p>
+              </div>
+
               <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">{t("prompts_suggestion")}</p>
               <div className="flex flex-wrap gap-2">
                 {[
-                  { name: "Stability AI", type: "Image", color: "bg-purple-500/15 text-purple-400 border-purple-500/30" },
-                  { name: "DALL·E", type: "Image", color: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" },
-                  { name: "DeepAI", type: "Image", color: "bg-blue-500/15 text-blue-400 border-blue-500/30" },
+                  { name: "Stability AI", color: "bg-purple-500/15 text-purple-400 border-purple-500/30" },
+                  { name: "DALL·E", color: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" },
+                  { name: "DeepAI", color: "bg-blue-500/15 text-blue-400 border-blue-500/30" },
                 ].map((ai) => (
                   <span key={ai.name} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium ${ai.color}`}>
                     <Image className="h-3 w-3" />
@@ -222,7 +231,7 @@ const Landing = () => {
         <div className="mx-auto max-w-6xl flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary" />
-            <span>Chat Companion © {new Date().getFullYear()}</span>
+            <span>Pr@mpt © {new Date().getFullYear()}</span>
           </div>
           <div className="flex gap-6">
             <button onClick={() => navigate("/privacy")} className="hover:text-foreground transition-colors">{t("footer_privacy")}</button>

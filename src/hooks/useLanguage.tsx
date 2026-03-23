@@ -59,7 +59,7 @@ const translations = {
   prompts_example_text: { fr: "Je veux un logo minimaliste pour une startup tech", en: "I want a minimalist logo for a tech startup" },
   prompts_optimized: { fr: "Prompt optimisé par Pr@mpt :", en: "Prompt optimized by Pr@mpt:" },
   prompts_optimized_text: {
-    fr: "Create a clean, minimalist logo for a tech startup. Use geometric shapes, a modern sans-serif font, and a limited color palette of 2-3 colors. The design should convey innovation and simplicity. Output as high-resolution PNG with transparent background.",
+    fr: "Crée un logo épuré et minimaliste pour une startup tech. Utilise des formes géométriques, une police sans-serif moderne et une palette limitée de 2 à 3 couleurs. Le design doit évoquer l'innovation et la simplicité. Exporte en PNG haute résolution avec fond transparent.",
     en: "Create a clean, minimalist logo for a tech startup. Use geometric shapes, a modern sans-serif font, and a limited color palette of 2-3 colors. The design should convey innovation and simplicity. Output as high-resolution PNG with transparent background.",
   },
   prompts_suggestion: { fr: "IA suggérée :", en: "Suggested AI:" },

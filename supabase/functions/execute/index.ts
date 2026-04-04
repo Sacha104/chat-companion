@@ -13,11 +13,97 @@ const CREDIT_COSTS: Record<string, number> = {
   video: 5,
 };
 
+interface AttachmentData {
+  base64: string;
+  mimeType: string;
+  fileName: string;
+}
+
+// Build multimodal content array for providers that support it
+function buildMultimodalContent(prompt: string, attachments?: AttachmentData[]) {
+  if (!attachments || attachments.length === 0) {
+    return prompt;
+  }
+
+  const parts: any[] = [];
+
+  // Add attachments first
+  for (const att of attachments) {
+    if (att.mimeType.startsWith("image/")) {
+      parts.push({
+        type: "image_url",
+        image_url: {
+          url: `data:${att.mimeType};base64,${att.base64}`,
+        },
+      });
+    } else {
+      // For documents, include as text context
+      // Try to decode as text, or include metadata
+      try {
+        const decoded = atob(att.base64);
+        parts.push({
+          type: "text",
+          text: `[Contenu du fichier "${att.fileName}" (${att.mimeType}):\n${decoded}\n]`,
+        });
+      } catch {
+        parts.push({
+          type: "text",
+          text: `[Fichier joint: ${att.fileName} (${att.mimeType})]`,
+        });
+      }
+    }
+  }
+
+  // Add the prompt text
+  parts.push({ type: "text", text: prompt });
+
+  return parts;
+}
+
+// Build Anthropic-specific multimodal content
+function buildAnthropicContent(prompt: string, attachments?: AttachmentData[]) {
+  if (!attachments || attachments.length === 0) {
+    return prompt;
+  }
+
+  const parts: any[] = [];
+
+  for (const att of attachments) {
+    if (att.mimeType.startsWith("image/")) {
+      parts.push({
+        type: "image",
+        source: {
+          type: "base64",
+          media_type: att.mimeType,
+          data: att.base64,
+        },
+      });
+    } else {
+      try {
+        const decoded = atob(att.base64);
+        parts.push({
+          type: "text",
+          text: `[Contenu du fichier "${att.fileName}" (${att.mimeType}):\n${decoded}\n]`,
+        });
+      } catch {
+        parts.push({
+          type: "text",
+          text: `[Fichier joint: ${att.fileName} (${att.mimeType})]`,
+        });
+      }
+    }
+  }
+
+  parts.push({ type: "text", text: prompt });
+
+  return parts;
+}
+
 const PROVIDERS: Record<string, {
   envKey: string;
   type: "chat" | "image" | "video";
   url: string;
-  buildBody: (prompt: string, model?: string) => any;
+  buildBody: (prompt: string, model?: string, attachments?: AttachmentData[]) => any;
   authHeader: (key: string) => Record<string, string>;
   stream: boolean;
 }> = {
@@ -25,9 +111,9 @@ const PROVIDERS: Record<string, {
     envKey: "OPENAI_API_KEY",
     type: "chat",
     url: "https://api.openai.com/v1/chat/completions",
-    buildBody: (prompt, model) => ({
+    buildBody: (prompt, model, attachments) => ({
       model: model ?? "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }],
+      messages: [{ role: "user", content: buildMultimodalContent(prompt, attachments) }],
       stream: true,
     }),
     authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
@@ -37,10 +123,10 @@ const PROVIDERS: Record<string, {
     envKey: "ANTHROPIC_API_KEY",
     type: "chat",
     url: "https://api.anthropic.com/v1/messages",
-    buildBody: (prompt, model) => ({
+    buildBody: (prompt, model, attachments) => ({
       model: model ?? "claude-sonnet-4-20250514",
       max_tokens: 4096,
-      messages: [{ role: "user", content: prompt }],
+      messages: [{ role: "user", content: buildAnthropicContent(prompt, attachments) }],
       stream: true,
     }),
     authHeader: (key) => ({ "x-api-key": key, "anthropic-version": "2023-06-01" }),
@@ -50,9 +136,9 @@ const PROVIDERS: Record<string, {
     envKey: "GEMINI_API_KEY",
     type: "chat",
     url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
-    buildBody: (prompt, model) => ({
+    buildBody: (prompt, model, attachments) => ({
       model: model ?? "gemini-2.0-flash",
-      messages: [{ role: "user", content: prompt }],
+      messages: [{ role: "user", content: buildMultimodalContent(prompt, attachments) }],
       stream: true,
     }),
     authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
@@ -131,7 +217,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { prompt, provider, model } = await req.json();
+    const { prompt, provider, model, attachments } = await req.json();
 
     if (!prompt || typeof prompt !== "string") {
       return new Response(JSON.stringify({ error: "prompt string is required" }), {
@@ -163,7 +249,6 @@ serve(async (req) => {
     }
 
     const token = authHeader.replace("Bearer ", "");
-    // Try to get user - if it's just the anon key, we still need user auth
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_ANON_KEY") ?? "",
@@ -179,7 +264,6 @@ serve(async (req) => {
     const userId = userData.user.id;
     const cost = CREDIT_COSTS[cfg.type] ?? 1;
 
-    // Deduct credits atomically
     const { data: remaining, error: deductError } = await supabaseAdmin.rpc("deduct_credits", {
       p_user_id: userId,
       p_amount: cost,
@@ -192,7 +276,6 @@ serve(async (req) => {
         });
       }
       if (deductError.message?.includes("NO_CREDITS_ROW")) {
-        // Create row and retry
         await supabaseAdmin.from("user_credits").insert({ user_id: userId, credits: 0 });
         return new Response(JSON.stringify({ error: "Crédits insuffisants", code: "INSUFFICIENT_CREDITS", cost }), {
           status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -203,11 +286,9 @@ serve(async (req) => {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    // --- End credit check ---
 
     const apiKey = Deno.env.get(cfg.envKey);
     if (!apiKey) {
-      // Refund credits if API key missing
       await supabaseAdmin.rpc("add_credits", { p_user_id: userId, p_amount: cost });
       return new Response(
         JSON.stringify({ error: `${cfg.envKey} is not configured.` }),
@@ -215,11 +296,27 @@ serve(async (req) => {
       );
     }
 
+    // Validate attachments if provided
+    const validAttachments: AttachmentData[] | undefined = Array.isArray(attachments) 
+      ? attachments.filter((a: any) => a?.base64 && a?.mimeType && a?.fileName)
+      : undefined;
+
     // Stability AI (binary image response)
     if (provider === "stability") {
       const formData = new FormData();
       formData.append("prompt", prompt);
       formData.append("output_format", "png");
+
+      // If there's an image attachment, use it as init_image for img2img
+      if (validAttachments?.length && validAttachments[0].mimeType.startsWith("image/")) {
+        const binaryStr = atob(validAttachments[0].base64);
+        const bytes = new Uint8Array(binaryStr.length);
+        for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
+        const blob = new Blob([bytes], { type: validAttachments[0].mimeType });
+        formData.append("image", blob, validAttachments[0].fileName);
+        formData.append("strength", "0.7");
+        formData.append("mode", "image-to-image");
+      }
 
       const response = await fetch(cfg.url, {
         method: "POST",
@@ -247,6 +344,14 @@ serve(async (req) => {
     if (provider === "deepai") {
       const formData = new FormData();
       formData.append("text", prompt);
+
+      if (validAttachments?.length && validAttachments[0].mimeType.startsWith("image/")) {
+        const binaryStr = atob(validAttachments[0].base64);
+        const bytes = new Uint8Array(binaryStr.length);
+        for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
+        const blob = new Blob([bytes], { type: validAttachments[0].mimeType });
+        formData.append("image", blob, validAttachments[0].fileName);
+      }
 
       const response = await fetch(cfg.url, {
         method: "POST",
@@ -315,11 +420,11 @@ serve(async (req) => {
       });
     }
 
-    // Chat/streaming providers
+    // Chat/streaming providers (with multimodal support)
     const response = await fetch(cfg.url, {
       method: "POST",
       headers: { ...cfg.authHeader(apiKey), "Content-Type": "application/json" },
-      body: JSON.stringify(cfg.buildBody(prompt, model)),
+      body: JSON.stringify(cfg.buildBody(prompt, model, validAttachments)),
     });
 
     if (!response.ok) {

@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Wand2, Code, Image, Video, Type, Loader2 } from "lucide-react";
+import { Wand2, Code, Image, Video, Type, Loader2, Paperclip } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import type { Attachment } from "@/components/ChatInput";
 
 interface AiSuggestion {
   provider: string;
@@ -9,52 +10,69 @@ interface AiSuggestion {
   description: string;
   icon: React.ReactNode;
   type: "text" | "code" | "image" | "video";
+  supportsAttachments?: boolean;
 }
 
 const ALL_PROVIDERS: AiSuggestion[] = [
-  { provider: "openai", label: "OpenAI GPT", description: "Texte & code polyvalent", icon: <Type className="h-4 w-4" />, type: "text" },
-  { provider: "anthropic", label: "Claude", description: "Raisonnement & analyse", icon: <Type className="h-4 w-4" />, type: "text" },
-  { provider: "gemini", label: "Google Gemini", description: "Multimodal & rapide", icon: <Type className="h-4 w-4" />, type: "text" },
-  { provider: "mistral", label: "Mistral AI", description: "IA française performante", icon: <Type className="h-4 w-4" />, type: "text" },
-  { provider: "deepseek", label: "DeepSeek Coder", description: "Spécialisé code", icon: <Code className="h-4 w-4" />, type: "code" },
-  { provider: "stability", label: "Stability AI", description: "Génération d'images HD", icon: <Image className="h-4 w-4" />, type: "image" },
-  { provider: "deepai", label: "DeepAI", description: "Images rapides", icon: <Image className="h-4 w-4" />, type: "image" },
-  { provider: "runwayml", label: "RunwayML", description: "Vidéo & animation", icon: <Video className="h-4 w-4" />, type: "video" },
-  { provider: "kling", label: "Kling AI", description: "Vidéo IA avancée", icon: <Video className="h-4 w-4" />, type: "video" },
+  { provider: "openai", label: "OpenAI GPT", description: "Texte & code polyvalent", icon: <Type className="h-4 w-4" />, type: "text", supportsAttachments: true },
+  { provider: "anthropic", label: "Claude", description: "Raisonnement & analyse", icon: <Type className="h-4 w-4" />, type: "text", supportsAttachments: true },
+  { provider: "gemini", label: "Google Gemini", description: "Multimodal & rapide", icon: <Type className="h-4 w-4" />, type: "text", supportsAttachments: true },
+  { provider: "mistral", label: "Mistral AI", description: "IA française performante", icon: <Type className="h-4 w-4" />, type: "text", supportsAttachments: false },
+  { provider: "deepseek", label: "DeepSeek Coder", description: "Spécialisé code", icon: <Code className="h-4 w-4" />, type: "code", supportsAttachments: false },
+  { provider: "stability", label: "Stability AI", description: "Génération d'images HD", icon: <Image className="h-4 w-4" />, type: "image", supportsAttachments: false },
+  { provider: "deepai", label: "DeepAI", description: "Images rapides", icon: <Image className="h-4 w-4" />, type: "image", supportsAttachments: false },
+  { provider: "runwayml", label: "RunwayML", description: "Vidéo & animation", icon: <Video className="h-4 w-4" />, type: "video", supportsAttachments: false },
+  { provider: "kling", label: "Kling AI", description: "Vidéo IA avancée", icon: <Video className="h-4 w-4" />, type: "video", supportsAttachments: false },
 ];
 
-// Detect which providers are most relevant for a prompt
-function suggestProviders(prompt: string): AiSuggestion[] {
+const fileToBase64 = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve((reader.result as string).split(",")[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
+function suggestProviders(prompt: string, hasAttachments: boolean): AiSuggestion[] {
   const lower = prompt.toLowerCase();
   const suggestions: AiSuggestion[] = [];
+
+  // If attachments are present, prioritize multimodal providers
+  if (hasAttachments) {
+    suggestions.push(
+      ALL_PROVIDERS.find(p => p.provider === "gemini")!,
+      ALL_PROVIDERS.find(p => p.provider === "openai")!,
+      ALL_PROVIDERS.find(p => p.provider === "anthropic")!,
+    );
+  }
 
   const hasImage = /\b(image|photo|illustration|dessin|logo|picture|icon[eê]?|affiche|poster|artwork)\b/i.test(lower);
   const hasVideo = /\b(vid[eé]o|animation|motion|clip|film|cin[eé]ma)\b/i.test(lower);
   const hasCode = /\b(code|program|script|function|algorithm|api|développ|develop|debug|html|css|javascript|python|react|sql)\b/i.test(lower);
 
   if (hasImage) {
-    suggestions.push(
-      ALL_PROVIDERS.find(p => p.provider === "stability")!,
-      ALL_PROVIDERS.find(p => p.provider === "deepai")!,
-    );
+    const stability = ALL_PROVIDERS.find(p => p.provider === "stability")!;
+    const deepai = ALL_PROVIDERS.find(p => p.provider === "deepai")!;
+    if (!suggestions.find(s => s.provider === stability.provider)) suggestions.push(stability);
+    if (!suggestions.find(s => s.provider === deepai.provider)) suggestions.push(deepai);
   }
 
   if (hasVideo) {
-    suggestions.push(
-      ALL_PROVIDERS.find(p => p.provider === "runwayml")!,
-      ALL_PROVIDERS.find(p => p.provider === "kling")!,
-    );
+    const runway = ALL_PROVIDERS.find(p => p.provider === "runwayml")!;
+    const kling = ALL_PROVIDERS.find(p => p.provider === "kling")!;
+    if (!suggestions.find(s => s.provider === runway.provider)) suggestions.push(runway);
+    if (!suggestions.find(s => s.provider === kling.provider)) suggestions.push(kling);
   }
 
   if (hasCode) {
-    suggestions.push(
-      ALL_PROVIDERS.find(p => p.provider === "deepseek")!,
-      ALL_PROVIDERS.find(p => p.provider === "openai")!,
-      ALL_PROVIDERS.find(p => p.provider === "anthropic")!,
-    );
+    const deepseek = ALL_PROVIDERS.find(p => p.provider === "deepseek")!;
+    const openai = ALL_PROVIDERS.find(p => p.provider === "openai")!;
+    const anthropic = ALL_PROVIDERS.find(p => p.provider === "anthropic")!;
+    if (!suggestions.find(s => s.provider === deepseek.provider)) suggestions.push(deepseek);
+    if (!suggestions.find(s => s.provider === openai.provider)) suggestions.push(openai);
+    if (!suggestions.find(s => s.provider === anthropic.provider)) suggestions.push(anthropic);
   }
 
-  // Always suggest text AIs if nothing specific matched or as complement
   if (suggestions.length === 0) {
     suggestions.push(
       ALL_PROVIDERS.find(p => p.provider === "openai")!,
@@ -64,7 +82,6 @@ function suggestProviders(prompt: string): AiSuggestion[] {
     );
   }
 
-  // Add remaining if not already present (max 5 shown)
   for (const p of ALL_PROVIDERS) {
     if (!suggestions.find(s => s.provider === p.provider)) {
       suggestions.push(p);
@@ -76,6 +93,7 @@ function suggestProviders(prompt: string): AiSuggestion[] {
 
 interface PromptExecutorProps {
   prompt: string;
+  attachments?: Attachment[];
   onExecutionResult: (result: ExecutionResult) => void;
   onCreditsChanged?: () => void;
 }
@@ -83,18 +101,19 @@ interface PromptExecutorProps {
 export interface ExecutionResult {
   provider: string;
   type: "text" | "code" | "image" | "video";
-  content?: string;      // text/code streaming result
-  imageUrl?: string;      // image URL or base64
-  imageData?: string;     // base64 data
+  content?: string;
+  imageUrl?: string;
+  imageData?: string;
 }
 
 const EXECUTE_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/execute`;
 
-const PromptExecutor = ({ prompt, onExecutionResult, onCreditsChanged }: PromptExecutorProps) => {
+const PromptExecutor = ({ prompt, attachments, onExecutionResult, onCreditsChanged }: PromptExecutorProps) => {
   const [executing, setExecuting] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
 
-  const suggestions = suggestProviders(prompt);
+  const hasAttachments = (attachments?.length ?? 0) > 0;
+  const suggestions = suggestProviders(prompt, hasAttachments);
 
   const handleExecute = async (suggestion: AiSuggestion) => {
     setSelectedProvider(suggestion.provider);
@@ -109,13 +128,29 @@ const PromptExecutor = ({ prompt, onExecutionResult, onCreditsChanged }: PromptE
         return;
       }
 
+      // Prepare attachments as base64 for multimodal providers
+      let attachmentData: Array<{ base64: string; mimeType: string; fileName: string }> | undefined;
+      if (hasAttachments && suggestion.supportsAttachments) {
+        attachmentData = await Promise.all(
+          attachments!.map(async (att) => ({
+            base64: await fileToBase64(att.file),
+            mimeType: att.file.type,
+            fileName: att.file.name,
+          }))
+        );
+      }
+
       const resp = await fetch(EXECUTE_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ prompt, provider: suggestion.provider }),
+        body: JSON.stringify({
+          prompt,
+          provider: suggestion.provider,
+          attachments: attachmentData,
+        }),
       });
 
       if (!resp.ok) {
@@ -204,6 +239,12 @@ const PromptExecutor = ({ prompt, onExecutionResult, onCreditsChanged }: PromptE
       <div className="flex items-center gap-2 mb-2.5">
         <Wand2 className="h-4 w-4 text-primary" />
         <span className="text-xs font-semibold text-foreground">Exécuter avec une IA</span>
+        {hasAttachments && (
+          <span className="flex items-center gap-1 text-[10px] text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+            <Paperclip className="h-3 w-3" />
+            {attachments!.length} fichier{attachments!.length > 1 ? "s" : ""} joint{attachments!.length > 1 ? "s" : ""}
+          </span>
+        )}
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -224,7 +265,12 @@ const PromptExecutor = ({ prompt, onExecutionResult, onCreditsChanged }: PromptE
               s.icon
             )}
             <div>
-              <div className="text-xs font-semibold leading-tight">{s.label}</div>
+              <div className="text-xs font-semibold leading-tight">
+                {s.label}
+                {hasAttachments && s.supportsAttachments && (
+                  <Paperclip className="inline h-3 w-3 ml-1 opacity-50" />
+                )}
+              </div>
               <div className="text-[10px] opacity-60">{s.description}</div>
             </div>
           </button>

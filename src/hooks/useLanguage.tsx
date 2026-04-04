@@ -199,6 +199,9 @@ const translations = {
   // ===== Chat Input =====
   chat_placeholder: { fr: "Écrivez votre message…", en: "Type your message…" },
   chat_disclaimer: { fr: "L'IA peut faire des erreurs. Vérifiez les informations importantes.", en: "AI can make mistakes. Verify important information." },
+  chat_attach: { fr: "Joindre un fichier", en: "Attach a file" },
+  chat_describe_attachment: { fr: "Décrivez ce que vous voulez faire avec ce fichier…", en: "Describe what you want to do with this file…" },
+  chat_attachment_label: { fr: "📎 Pièce jointe", en: "📎 Attachment" },
 
   // ===== NotFound =====
   notfound_title: { fr: "Page non trouvée", en: "Page not found" },

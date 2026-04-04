@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sparkles, PanelLeftClose, PanelLeft, Zap, Copy, Check, LogOut, Code, Image as ImageIcon, Coins, Globe } from "lucide-react";
+import { Sparkles, PanelLeftClose, PanelLeft, Zap, Copy, Check, LogOut, Code, Image as ImageIcon, Coins, Globe, FileText } from "lucide-react";
 import { toast } from "sonner";
 import ChatSidebar from "@/components/ChatSidebar";
-import ChatInput from "@/components/ChatInput";
+import ChatInput, { type Attachment } from "@/components/ChatInput";
 import PromptExecutor, { type ExecutionResult } from "@/components/PromptExecutor";
 import { useAuth } from "@/hooks/useAuth";
 import { useCredits } from "@/hooks/useCredits";
@@ -14,7 +14,8 @@ interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
-  isPrompt?: boolean; // marks an assistant message as a generated prompt
+  isPrompt?: boolean;
+  attachments?: Attachment[];
 }
 
 interface Conversation {
@@ -23,12 +24,26 @@ interface Conversation {
   created_at: string;
 }
 
+// Convert File to base64 string
+const fileToBase64 = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      // Remove data:xxx;base64, prefix
+      resolve(result.split(",")[1]);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
 const CopyButton = ({ text }: { text: string }) => {
   const [copied, setCopied] = useState(false);
+  const { t } = useLanguage();
   const handleCopy = () => {
     navigator.clipboard.writeText(text);
     setCopied(true);
-    toast.success("Prompt copié !");
+    toast.success(t("chat_copied"));
     setTimeout(() => setCopied(false), 2000);
   };
   return (
@@ -53,9 +68,10 @@ const Chat = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  // Execution state
   const [executionResults, setExecutionResults] = useState<Record<string, ExecutionResult>>({});
   const [executingMsgId, setExecutingMsgId] = useState<string | null>(null);
+  // Store attachments per prompt message for later execution
+  const [promptAttachments, setPromptAttachments] = useState<Record<string, Attachment[]>>({});
 
   const loadConversations = useCallback(async () => {
     if (!user) return;
@@ -74,6 +90,7 @@ const Chat = () => {
     setActiveConvId(id);
     setExecutionResults({});
     setExecutingMsgId(null);
+    setPromptAttachments({});
     const { data } = await supabase
       .from("messages")
       .select("id, role, content")
@@ -103,8 +120,12 @@ const Chat = () => {
     });
   };
 
-  const handleSend = async (content: string) => {
-    const userMsg: Message = { id: Date.now().toString(), role: "user", content };
+  const handleSend = async (content: string, attachments: Attachment[]) => {
+    const displayContent = attachments.length > 0
+      ? `${content}${content ? "\n" : ""}${attachments.map(a => `📎 ${a.file.name}`).join("\n")}`
+      : content;
+
+    const userMsg: Message = { id: Date.now().toString(), role: "user", content: displayContent, attachments };
     const updatedMessages = [...messages, userMsg];
     setMessages(updatedMessages);
     setIsLoading(true);
@@ -113,12 +134,12 @@ const Chat = () => {
 
     let convId = activeConvId;
     if (!convId) {
-      convId = await createConversation(content);
-      if (!convId) { toast.error("Erreur lors de la création de la conversation"); setIsLoading(false); return; }
+      convId = await createConversation(content || attachments[0]?.file.name || "Nouvelle discussion");
+      if (!convId) { toast.error(t("chat_conv_error")); setIsLoading(false); return; }
       setActiveConvId(convId);
     }
 
-    await saveMessage(convId, "user", content);
+    await saveMessage(convId, "user", displayContent);
 
     let assistantSoFar = "";
     let assistantMsgId = (Date.now() + 1).toString();
@@ -135,9 +156,8 @@ const Chat = () => {
     };
 
     try {
-      // Check credits before sending
       if (credits !== null && credits < 1) {
-        toast.error("Crédits insuffisants. Rechargez vos crédits pour continuer.");
+        toast.error(t("chat_no_credits"));
         setMessages((prev) => prev.filter((m) => m.id !== userMsg.id));
         setIsLoading(false);
         return;
@@ -146,6 +166,31 @@ const Chat = () => {
       const session = await supabase.auth.getSession();
       const accessToken = session.data.session?.access_token;
 
+      // Build messages for the chat API – include attachment info in context
+      const chatMessages = updatedMessages.map((m) => ({
+        role: m.role,
+        content: m.content,
+      }));
+
+      // Add attachment context if present
+      const hasAttachments = attachments.length > 0;
+      let attachmentContext = "";
+      if (hasAttachments) {
+        const fileDescs = attachments.map(a =>
+          `- ${a.file.name} (${a.type === "image" ? "image" : "document"}, ${a.type === "image" ? a.file.type : a.file.type})`
+        ).join("\n");
+        attachmentContext = `\n\n[L'utilisateur a joint les fichiers suivants. Le prompt optimisé DOIT inclure des instructions pour traiter/analyser ces fichiers :\n${fileDescs}]`;
+      }
+
+      // Append attachment context to the last user message for the AI
+      if (attachmentContext && chatMessages.length > 0) {
+        const lastIdx = chatMessages.length - 1;
+        chatMessages[lastIdx] = {
+          ...chatMessages[lastIdx],
+          content: chatMessages[lastIdx].content + attachmentContext,
+        };
+      }
+
       const resp = await fetch(CHAT_URL, {
         method: "POST",
         headers: {
@@ -153,13 +198,13 @@ const Chat = () => {
           Authorization: `Bearer ${accessToken || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
         body: JSON.stringify({
-          messages: updatedMessages.map((m) => ({ role: m.role, content: m.content })),
+          messages: chatMessages,
           provider: "openai",
         }),
       });
 
       if (resp.status === 402) {
-        toast.error("Crédits insuffisants. Rechargez vos crédits pour continuer.");
+        toast.error(t("chat_no_credits"));
         setMessages((prev) => prev.filter((m) => m.id !== userMsg.id));
         setIsLoading(false);
         refetchCredits();
@@ -204,16 +249,21 @@ const Chat = () => {
         await supabase
           .from("conversations")
           .update({
-            title: updatedMessages.length === 1 ? content.slice(0, 80) : undefined,
+            title: updatedMessages.length === 1 ? (content || attachments[0]?.file.name || "").slice(0, 80) : undefined,
             updated_at: new Date().toISOString(),
           })
           .eq("id", convId);
         loadConversations();
         refetchCredits();
+
+        // Store attachments keyed to the assistant message ID so PromptExecutor can use them
+        if (attachments.length > 0) {
+          setPromptAttachments((prev) => ({ ...prev, [assistantMsgId]: attachments }));
+        }
       }
     } catch (e: any) {
       console.error("Chat error:", e);
-      toast.error(e.message || "Erreur lors de la communication avec l'IA");
+      toast.error(e.message || t("chat_stream_error"));
       if (!assistantSoFar) setMessages((prev) => prev.filter((m) => m.id !== userMsg.id));
     } finally {
       setIsLoading(false);
@@ -230,6 +280,7 @@ const Chat = () => {
     setActiveConvId(null);
     setExecutionResults({});
     setExecutingMsgId(null);
+    setPromptAttachments({});
   };
 
   const now = new Date();
@@ -313,8 +364,33 @@ const Chat = () => {
                 <div key={msg.id} className="animate-fade-up" style={{ animationDelay: `${i * 60}ms` }}>
                   {msg.role === "user" ? (
                     <div className="flex justify-end">
-                      <div className="max-w-[80%] rounded-2xl rounded-br-md bg-chat-user px-4 py-2.5 text-sm text-foreground">
-                        {msg.content}
+                      <div className="max-w-[80%]">
+                        {/* Show attachment thumbnails in user message */}
+                        {msg.attachments && msg.attachments.length > 0 && (
+                          <div className="mb-2 flex flex-wrap gap-2 justify-end">
+                            {msg.attachments.map((att, j) => (
+                              <div key={j} className="rounded-xl overflow-hidden border border-border">
+                                {att.type === "image" && att.preview ? (
+                                  <img src={att.preview} alt={att.file.name} className="h-20 w-20 object-cover" />
+                                ) : (
+                                  <div className="flex items-center gap-2 px-3 py-2 bg-secondary/50 text-xs text-muted-foreground">
+                                    <FileText className="h-4 w-4 text-primary" />
+                                    <span className="max-w-[100px] truncate">{att.file.name}</span>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        <div className="rounded-2xl rounded-br-md bg-chat-user px-4 py-2.5 text-sm text-foreground">
+                          {msg.content.split("\n").map((line, k) =>
+                            line.startsWith("📎") ? (
+                              <span key={k} className="block text-xs text-muted-foreground">{line}</span>
+                            ) : (
+                              <span key={k} className="block">{line}</span>
+                            )
+                          )}
+                        </div>
                       </div>
                     </div>
                   ) : (
@@ -331,16 +407,15 @@ const Chat = () => {
                           )}
                         </div>
 
-                        {/* Show AI execution panel after prompt is done generating */}
                         {msg.role === "assistant" && !isLoading && (
                           <>
                             <PromptExecutor
                               prompt={msg.content}
+                              attachments={promptAttachments[msg.id]}
                               onExecutionResult={(result) => handleExecutionResult(msg.id, result)}
                               onCreditsChanged={refetchCredits}
                             />
 
-                            {/* Execution result */}
                             {executionResults[msg.id] && (
                               <div className="mt-3 animate-fade-up">
                                 <div className="rounded-xl border border-border bg-card p-4">
@@ -352,10 +427,9 @@ const Chat = () => {
                                     ) : (
                                       <Sparkles className="h-3.5 w-3.5" />
                                     )}
-                                    Résultat — {executionResults[msg.id].provider}
+                                    {t("chat_result")} — {executionResults[msg.id].provider}
                                   </div>
 
-                                  {/* Image result */}
                                   {executionResults[msg.id].type === "image" && (
                                     <div className="rounded-lg overflow-hidden">
                                       <img
@@ -366,7 +440,6 @@ const Chat = () => {
                                     </div>
                                   )}
 
-                                  {/* Text result */}
                                   {(executionResults[msg.id].type === "text" || executionResults[msg.id].type === "code") && (
                                     <div className="group/result relative">
                                       <pre className={`whitespace-pre-wrap text-sm leading-relaxed ${

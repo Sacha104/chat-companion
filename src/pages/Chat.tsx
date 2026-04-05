@@ -401,7 +401,7 @@ const Chat = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="group/msg relative max-w-[85%] rounded-2xl rounded-tl-md bg-chat-ai px-4 py-2.5 text-sm text-foreground leading-relaxed">
-                          <pre className="whitespace-pre-wrap font-[inherit]">{msg.content}</pre>
+                          <MarkdownRenderer content={msg.content} />
                           {!isLoading && <CopyButton text={msg.content} />}
                           {isLoading && msg === messages[messages.length - 1] && (
                             <span className="ml-1 inline-block h-3 w-1.5 animate-pulse rounded-full bg-primary/60" />

@@ -281,9 +281,19 @@ const Chat = () => {
     }
   };
 
-  const handleExecutionResult = (msgId: string, result: ExecutionResult) => {
+  const handleExecutionResult = async (msgId: string, result: ExecutionResult) => {
     setExecutingMsgId(msgId);
     setExecutionResults((prev) => ({ ...prev, [msgId]: result }));
+
+    // Persist execution result to DB metadata (only for final/complete results)
+    try {
+      await supabase
+        .from("messages")
+        .update({ metadata: { executionResult: result } as any })
+        .eq("id", msgId);
+    } catch (e) {
+      console.error("Failed to save execution result:", e);
+    }
   };
 
   const handleNewChat = () => {

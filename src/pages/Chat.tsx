@@ -436,6 +436,7 @@ const Chat = () => {
                               prompt={msg.content}
                               attachments={promptAttachments[msg.id]}
                               onExecutionResult={(result) => handleExecutionResult(msg.id, result)}
+                              onExecutionComplete={(result) => handleExecutionComplete(msg.id, result)}
                               onCreditsChanged={refetchCredits}
                             />
 

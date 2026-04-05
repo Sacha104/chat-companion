@@ -216,6 +216,13 @@ const PromptExecutor = ({ prompt, attachments, onExecutionResult, onExecutionCom
             break;
           }
         }
+      // Notify completion with final content
+      if (fullContent) {
+        onExecutionComplete?.({
+          provider: suggestion.provider,
+          type: suggestion.type === "code" ? "code" : "text",
+          content: fullContent,
+        });
       }
     } catch (e: any) {
       console.error("Execution error:", e);

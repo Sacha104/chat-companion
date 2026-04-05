@@ -281,11 +281,13 @@ const Chat = () => {
     }
   };
 
-  const handleExecutionResult = async (msgId: string, result: ExecutionResult) => {
+  const handleExecutionResult = (msgId: string, result: ExecutionResult) => {
     setExecutingMsgId(msgId);
     setExecutionResults((prev) => ({ ...prev, [msgId]: result }));
+  };
 
-    // Persist execution result to DB metadata (only for final/complete results)
+  const handleExecutionComplete = async (msgId: string, result: ExecutionResult) => {
+    // Persist final execution result to DB
     try {
       await supabase
         .from("messages")

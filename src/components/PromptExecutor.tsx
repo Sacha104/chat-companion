@@ -95,6 +95,7 @@ interface PromptExecutorProps {
   prompt: string;
   attachments?: Attachment[];
   onExecutionResult: (result: ExecutionResult) => void;
+  onExecutionComplete?: (result: ExecutionResult) => void;
   onCreditsChanged?: () => void;
 }
 

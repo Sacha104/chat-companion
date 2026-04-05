@@ -215,6 +215,7 @@ const PromptExecutor = ({ prompt, attachments, onExecutionResult, onExecutionCom
             buffer = line + "\n" + buffer;
             break;
           }
+        }
       }
       // Notify completion with final content
 

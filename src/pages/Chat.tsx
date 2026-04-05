@@ -443,13 +443,13 @@ const Chat = () => {
 
                                   {(executionResults[msg.id].type === "text" || executionResults[msg.id].type === "code") && (
                                     <div className="group/result relative">
-                                      <pre className={`whitespace-pre-wrap text-sm leading-relaxed ${
-                                        executionResults[msg.id].type === "code"
-                                          ? "bg-secondary/50 rounded-lg p-3 font-mono text-xs overflow-x-auto"
-                                          : "font-[inherit]"
-                                      }`}>
-                                        {executionResults[msg.id].content}
-                                      </pre>
+                                      {executionResults[msg.id].type === "code" ? (
+                                        <pre className="whitespace-pre-wrap bg-secondary/50 rounded-lg p-3 font-mono text-xs overflow-x-auto">
+                                          {executionResults[msg.id].content}
+                                        </pre>
+                                      ) : (
+                                        <MarkdownRenderer content={executionResults[msg.id].content || ""} />
+                                      )}
                                       {executionResults[msg.id].content && (
                                         <CopyButton text={executionResults[msg.id].content!} />
                                       )}

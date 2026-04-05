@@ -109,7 +109,7 @@ export interface ExecutionResult {
 
 const EXECUTE_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/execute`;
 
-const PromptExecutor = ({ prompt, attachments, onExecutionResult, onCreditsChanged }: PromptExecutorProps) => {
+const PromptExecutor = ({ prompt, attachments, onExecutionResult, onExecutionComplete, onCreditsChanged }: PromptExecutorProps) => {
   const [executing, setExecuting] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
 

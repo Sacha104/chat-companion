@@ -95,6 +95,7 @@ interface PromptExecutorProps {
   prompt: string;
   attachments?: Attachment[];
   onExecutionResult: (result: ExecutionResult) => void;
+  onExecutionComplete?: (result: ExecutionResult) => void;
   onCreditsChanged?: () => void;
 }
 
@@ -108,7 +109,7 @@ export interface ExecutionResult {
 
 const EXECUTE_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/execute`;
 
-const PromptExecutor = ({ prompt, attachments, onExecutionResult, onCreditsChanged }: PromptExecutorProps) => {
+const PromptExecutor = ({ prompt, attachments, onExecutionResult, onExecutionComplete, onCreditsChanged }: PromptExecutorProps) => {
   const [executing, setExecuting] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
 
@@ -166,12 +167,14 @@ const PromptExecutor = ({ prompt, attachments, onExecutionResult, onCreditsChang
       // Image / non-streaming response
       if (suggestion.type === "image") {
         const data = await resp.json();
-        onExecutionResult({
+        const imageResult: ExecutionResult = {
           provider: suggestion.provider,
           type: "image",
           imageUrl: data.url,
           imageData: data.data,
-        });
+        };
+        onExecutionResult(imageResult);
+        onExecutionComplete?.(imageResult);
         setExecuting(false);
         return;
       }
@@ -213,6 +216,15 @@ const PromptExecutor = ({ prompt, attachments, onExecutionResult, onCreditsChang
             break;
           }
         }
+      }
+      // Notify completion with final content
+
+      if (fullContent) {
+        onExecutionComplete?.({
+          provider: suggestion.provider,
+          type: suggestion.type === "code" ? "code" : "text",
+          content: fullContent,
+        });
       }
     } catch (e: any) {
       console.error("Execution error:", e);

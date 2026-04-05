@@ -94,10 +94,20 @@ const Chat = () => {
     setPromptAttachments({});
     const { data } = await supabase
       .from("messages")
-      .select("id, role, content")
+      .select("id, role, content, metadata")
       .eq("conversation_id", id)
       .order("created_at", { ascending: true });
-    if (data) setMessages(data.map(m => ({ ...m, role: m.role as "user" | "assistant" })));
+    if (data) {
+      setMessages(data.map(m => ({ ...m, role: m.role as "user" | "assistant" })));
+      // Restore execution results from metadata
+      const restored: Record<string, ExecutionResult> = {};
+      for (const m of data) {
+        if (m.metadata && typeof m.metadata === "object" && (m.metadata as any).executionResult) {
+          restored[m.id] = (m.metadata as any).executionResult;
+        }
+      }
+      setExecutionResults(restored);
+    }
   };
 
   const createConversation = async (title: string): Promise<string | null> => {
@@ -276,6 +286,18 @@ const Chat = () => {
     setExecutionResults((prev) => ({ ...prev, [msgId]: result }));
   };
 
+  const handleExecutionComplete = async (msgId: string, result: ExecutionResult) => {
+    // Persist final execution result to DB
+    try {
+      await supabase
+        .from("messages")
+        .update({ metadata: { executionResult: result } as any })
+        .eq("id", msgId);
+    } catch (e) {
+      console.error("Failed to save execution result:", e);
+    }
+  };
+
   const handleNewChat = () => {
     setMessages([]);
     setActiveConvId(null);
@@ -414,6 +436,7 @@ const Chat = () => {
                               prompt={msg.content}
                               attachments={promptAttachments[msg.id]}
                               onExecutionResult={(result) => handleExecutionResult(msg.id, result)}
+                              onExecutionComplete={(result) => handleExecutionComplete(msg.id, result)}
                               onCreditsChanged={refetchCredits}
                             />
 

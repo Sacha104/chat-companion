@@ -167,12 +167,14 @@ const PromptExecutor = ({ prompt, attachments, onExecutionResult, onExecutionCom
       // Image / non-streaming response
       if (suggestion.type === "image") {
         const data = await resp.json();
-        onExecutionResult({
+        const imageResult: ExecutionResult = {
           provider: suggestion.provider,
           type: "image",
           imageUrl: data.url,
           imageData: data.data,
-        });
+        };
+        onExecutionResult(imageResult);
+        onExecutionComplete?.(imageResult);
         setExecuting(false);
         return;
       }

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sparkles, PanelLeftClose, PanelLeft, Zap, Copy, Check, LogOut, Code, Image as ImageIcon, Coins, Globe, FileText } from "lucide-react";
+import MarkdownRenderer from "@/components/MarkdownRenderer";
 import { toast } from "sonner";
 import ChatSidebar from "@/components/ChatSidebar";
 import ChatInput, { type Attachment } from "@/components/ChatInput";
@@ -400,7 +401,7 @@ const Chat = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="group/msg relative max-w-[85%] rounded-2xl rounded-tl-md bg-chat-ai px-4 py-2.5 text-sm text-foreground leading-relaxed">
-                          <pre className="whitespace-pre-wrap font-[inherit]">{msg.content}</pre>
+                          <MarkdownRenderer content={msg.content} />
                           {!isLoading && <CopyButton text={msg.content} />}
                           {isLoading && msg === messages[messages.length - 1] && (
                             <span className="ml-1 inline-block h-3 w-1.5 animate-pulse rounded-full bg-primary/60" />
@@ -442,13 +443,13 @@ const Chat = () => {
 
                                   {(executionResults[msg.id].type === "text" || executionResults[msg.id].type === "code") && (
                                     <div className="group/result relative">
-                                      <pre className={`whitespace-pre-wrap text-sm leading-relaxed ${
-                                        executionResults[msg.id].type === "code"
-                                          ? "bg-secondary/50 rounded-lg p-3 font-mono text-xs overflow-x-auto"
-                                          : "font-[inherit]"
-                                      }`}>
-                                        {executionResults[msg.id].content}
-                                      </pre>
+                                      {executionResults[msg.id].type === "code" ? (
+                                        <pre className="whitespace-pre-wrap bg-secondary/50 rounded-lg p-3 font-mono text-xs overflow-x-auto">
+                                          {executionResults[msg.id].content}
+                                        </pre>
+                                      ) : (
+                                        <MarkdownRenderer content={executionResults[msg.id].content || ""} />
+                                      )}
                                       {executionResults[msg.id].content && (
                                         <CopyButton text={executionResults[msg.id].content!} />
                                       )}

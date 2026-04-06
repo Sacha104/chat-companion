@@ -133,10 +133,45 @@ const Settings = () => {
           <p className="text-xs text-muted-foreground">{t("settings_credits_note")}</p>
         </section>
 
+        {/* Appearance */}
         <section className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-5">
           <div className="flex items-center gap-3 mb-1">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <Shield className="h-5 w-5" />
+            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-violet-500/10 text-violet-500">
+              <Palette className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="text-base font-semibold text-card-foreground">{t("settings_appearance")}</h2>
+              <p className="text-xs text-muted-foreground">{t("settings_appearance_desc")}</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => setTheme("light")}
+              className={`flex items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium transition-all active:scale-[0.97] ${
+                theme === "light"
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border bg-secondary/50 text-muted-foreground hover:bg-secondary"
+              }`}
+            >
+              <Sun className="h-4 w-4" />
+              {t("settings_theme_light")}
+            </button>
+            <button
+              onClick={() => setTheme("dark")}
+              className={`flex items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium transition-all active:scale-[0.97] ${
+                theme === "dark"
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border bg-secondary/50 text-muted-foreground hover:bg-secondary"
+              }`}
+            >
+              <Moon className="h-4 w-4" />
+              {t("settings_theme_dark")}
+            </button>
+          </div>
+        </section>
+
+
             </div>
             <div>
               <h2 className="text-base font-semibold text-card-foreground">{t("settings_security")}</h2>

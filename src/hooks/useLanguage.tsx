@@ -218,6 +218,12 @@ const translations = {
   chat_no_credits: { fr: "Crédits insuffisants. Rechargez vos crédits pour continuer.", en: "Not enough credits. Top up to continue." },
   chat_conv_error: { fr: "Erreur lors de la création de la conversation", en: "Error creating conversation" },
   chat_stream_error: { fr: "Erreur lors de la communication avec l'IA", en: "Error communicating with AI" },
+
+  // ===== Theme =====
+  settings_appearance: { fr: "Apparence", en: "Appearance" },
+  settings_appearance_desc: { fr: "Personnalisez l'apparence de l'application", en: "Customize the app's appearance" },
+  settings_theme_light: { fr: "Clair", en: "Light" },
+  settings_theme_dark: { fr: "Sombre", en: "Dark" },
 } as const;
 
 type TranslationKey = keyof typeof translations;

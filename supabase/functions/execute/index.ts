@@ -223,6 +223,31 @@ const PROVIDERS: Record<string, {
     authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
     stream: false,
   },
+  leonardo: {
+    envKey: "LEONARDO_API_KEY",
+    type: "image",
+    url: "https://cloud.leonardo.ai/api/rest/v1/generations",
+    buildBody: (prompt) => ({
+      prompt,
+      modelId: "6b645e3a-d64f-4341-a6d8-7a3690fbf042",
+      width: 1024,
+      height: 1024,
+      num_images: 1,
+    }),
+    authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
+    stream: false,
+  },
+  hailuo: {
+    envKey: "HAILUO_API_KEY",
+    type: "video",
+    url: "https://api.minimaxi.chat/v1/video_generation",
+    buildBody: (prompt) => ({
+      prompt,
+      model: "video-01",
+    }),
+    authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
+    stream: false,
+  },
 };
 
 serve(async (req) => {

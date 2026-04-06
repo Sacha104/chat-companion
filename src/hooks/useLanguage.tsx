@@ -187,6 +187,8 @@ const translations = {
   ai_deepai: { fr: "Génération d'images rapide et accessible.", en: "Fast and accessible image generation." },
   ai_runwayml: { fr: "Génération vidéo et animation par intelligence artificielle.", en: "AI-powered video generation and animation." },
   ai_kling: { fr: "Génération vidéo avancée par IA, texte vers vidéo.", en: "Advanced AI video generation, text to video." },
+  ai_leonardo: { fr: "Génération d'images HD depuis texte ou photo avec Leonardo AI.", en: "HD image generation from text or photo with Leonardo AI." },
+  ai_hailuo: { fr: "Génération vidéo depuis texte ou photo avec Hailuo AI (MiniMax).", en: "Video generation from text or photo with Hailuo AI (MiniMax)." },
 
   // ===== Company =====
   company_title: { fr: "Notre société", en: "Our company" },

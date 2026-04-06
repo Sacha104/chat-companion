@@ -2,18 +2,6 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ExternalLink, MessageSquare, Code, Image, Video } from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
 
-import openaiLogo from "@/assets/logos/openai.png";
-import anthropicLogo from "@/assets/logos/anthropic.png";
-import geminiLogo from "@/assets/logos/gemini.png";
-import mistralLogo from "@/assets/logos/mistral.png";
-import deepseekLogo from "@/assets/logos/deepseek.png";
-import stabilityLogo from "@/assets/logos/stability.png";
-import deepaiLogo from "@/assets/logos/deepai.png";
-import leonardoLogo from "@/assets/logos/leonardo.png";
-import runwaymlLogo from "@/assets/logos/runwayml.png";
-import klingLogo from "@/assets/logos/kling.png";
-import hailuoLogo from "@/assets/logos/hailuo.png";
-
 interface AIProvider {
   id: string;
   name: string;
@@ -24,17 +12,17 @@ interface AIProvider {
 }
 
 const providers: AIProvider[] = [
-  { id: "openai", name: "OpenAI GPT", descKey: "ai_openai", logoUrl: openaiLogo, type: "text", website: "https://openai.com" },
-  { id: "anthropic", name: "Claude (Anthropic)", descKey: "ai_anthropic", logoUrl: anthropicLogo, type: "text", website: "https://anthropic.com" },
-  { id: "gemini", name: "Google Gemini", descKey: "ai_gemini", logoUrl: geminiLogo, type: "text", website: "https://deepmind.google/technologies/gemini/" },
-  { id: "mistral", name: "Mistral AI", descKey: "ai_mistral", logoUrl: mistralLogo, type: "text", website: "https://mistral.ai" },
-  { id: "deepseek", name: "DeepSeek Coder", descKey: "ai_deepseek", logoUrl: deepseekLogo, type: "code", website: "https://deepseek.com" },
-  { id: "stability", name: "Stability AI", descKey: "ai_stability", logoUrl: stabilityLogo, type: "image", website: "https://stability.ai" },
-  { id: "deepai", name: "DeepAI", descKey: "ai_deepai", logoUrl: deepaiLogo, type: "image", website: "https://deepai.org" },
-  { id: "leonardo", name: "Leonardo AI", descKey: "ai_leonardo", logoUrl: leonardoLogo, type: "image", website: "https://leonardo.ai" },
-  { id: "runwayml", name: "RunwayML", descKey: "ai_runwayml", logoUrl: runwaymlLogo, type: "video", website: "https://runwayml.com" },
-  { id: "kling", name: "Kling AI", descKey: "ai_kling", logoUrl: klingLogo, type: "video", website: "https://klingai.com" },
-  { id: "hailuo", name: "Hailuo AI", descKey: "ai_hailuo", logoUrl: hailuoLogo, type: "video", website: "https://hailuoai.com" },
+  { id: "openai", name: "OpenAI GPT", descKey: "ai_openai", logoUrl: "https://avatars.githubusercontent.com/u/14957082?s=200&v=4", type: "text", website: "https://openai.com" },
+  { id: "anthropic", name: "Claude (Anthropic)", descKey: "ai_anthropic", logoUrl: "https://anthropic.com/images/icons/apple-touch-icon.png", type: "text", website: "https://anthropic.com" },
+  { id: "gemini", name: "Google Gemini", descKey: "ai_gemini", logoUrl: "https://www.gstatic.com/images/branding/productlogos/gemini/v4/web-64dp/logo_gemini_color_1x_web_64dp.png", type: "text", website: "https://deepmind.google/technologies/gemini/" },
+  { id: "mistral", name: "Mistral AI", descKey: "ai_mistral", logoUrl: "https://avatars.githubusercontent.com/u/132372032?s=200&v=4", type: "text", website: "https://mistral.ai" },
+  { id: "deepseek", name: "DeepSeek Coder", descKey: "ai_deepseek", logoUrl: "https://avatars.githubusercontent.com/u/148330874?s=200&v=4", type: "code", website: "https://deepseek.com" },
+  { id: "stability", name: "Stability AI", descKey: "ai_stability", logoUrl: "https://avatars.githubusercontent.com/u/100950301?s=200&v=4", type: "image", website: "https://stability.ai" },
+  { id: "deepai", name: "DeepAI", descKey: "ai_deepai", logoUrl: "https://avatars.githubusercontent.com/u/28962678?s=200&v=4", type: "image", website: "https://deepai.org" },
+  { id: "leonardo", name: "Leonardo AI", descKey: "ai_leonardo", logoUrl: "https://avatars.githubusercontent.com/u/122753895?s=200&v=4", type: "image", website: "https://leonardo.ai" },
+  { id: "runwayml", name: "RunwayML", descKey: "ai_runwayml", logoUrl: "https://avatars.githubusercontent.com/u/43209968?s=200&v=4", type: "video", website: "https://runwayml.com" },
+  { id: "kling", name: "Kling AI", descKey: "ai_kling", logoUrl: "https://avatars.githubusercontent.com/u/170592388?s=200&v=4", type: "video", website: "https://klingai.com" },
+  { id: "hailuo", name: "Hailuo AI", descKey: "ai_hailuo", logoUrl: "https://avatars.githubusercontent.com/u/137651451?s=200&v=4", type: "video", website: "https://hailuoai.com" },
 ];
 
 const OurAIs = () => {
@@ -78,14 +66,21 @@ const OurAIs = () => {
                 style={{ animationDelay: `${i * 70}ms` }}
               >
                 <div className="mb-4 flex items-start justify-between">
-                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-white p-2">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-secondary overflow-hidden">
                     <img
                       src={provider.logoUrl}
                       alt={provider.name}
-                      className="h-10 w-10 object-contain"
+                      className="h-12 w-12 object-cover"
                       loading="lazy"
-                      width={40}
-                      height={40}
+                      width={48}
+                      height={48}
+                      onError={(e) => {
+                        const el = e.target as HTMLImageElement;
+                        el.style.display = "none";
+                        if (el.parentElement) {
+                          el.parentElement.innerHTML = `<span class="text-lg font-bold text-primary">${provider.name.charAt(0)}</span>`;
+                        }
+                      }}
                     />
                   </div>
                   <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium ${tc.color}`}>

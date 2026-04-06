@@ -274,7 +274,15 @@ serve(async (req) => {
     }
 
     const userId = userData.user.id;
-    const cost = CREDIT_COSTS[cfg.type] ?? 1;
+    
+    // Validate attachments early so we can calculate cost
+    const validAttachments: AttachmentData[] | undefined = Array.isArray(attachments) 
+      ? attachments.filter((a: any) => a?.base64 && a?.mimeType && a?.fileName)
+      : undefined;
+    
+    const baseCost = CREDIT_COSTS[cfg.type] ?? 1;
+    const attachmentCost = calcAttachmentCost(validAttachments);
+    const cost = baseCost + attachmentCost;
 
     const { data: remaining, error: deductError } = await supabaseAdmin.rpc("deduct_credits", {
       p_user_id: userId,

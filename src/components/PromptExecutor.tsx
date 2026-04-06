@@ -291,7 +291,7 @@ const PromptExecutor = ({ prompt, attachments, onExecutionResult, onExecutionCom
             ) : (
               s.icon
             )}
-            <div>
+            <div className="flex-1">
               <div className="text-xs font-semibold leading-tight">
                 {s.label}
                 {hasAttachments && s.supportsAttachments && (
@@ -300,6 +300,9 @@ const PromptExecutor = ({ prompt, attachments, onExecutionResult, onExecutionCom
               </div>
               <div className="text-[10px] opacity-60">{s.description}</div>
             </div>
+            <span className="text-[10px] font-bold opacity-70 whitespace-nowrap">
+              {(BASE_COSTS[s.type] ?? 1) + (hasAttachments && s.supportsAttachments ? attachCost : 0)} cr.
+            </span>
           </button>
         ))}
       </div>

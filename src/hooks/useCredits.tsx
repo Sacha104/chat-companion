@@ -19,8 +19,7 @@ export function useCredits() {
       console.error("Error fetching credits:", error);
       setCredits(0);
     } else if (!data) {
-      // No row yet — insert one
-      await supabase.from("user_credits").insert({ user_id: user.id, credits: 0 });
+      // No row yet — will be created server-side on first subscription check
       setCredits(0);
     } else {
       setCredits(data.credits);

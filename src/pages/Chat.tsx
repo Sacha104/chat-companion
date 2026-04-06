@@ -258,7 +258,14 @@ const Chat = () => {
       }
 
       if (assistantSoFar) {
-        await saveMessage(convId, "assistant", assistantSoFar);
+        const dbId = await saveMessage(convId, "assistant", assistantSoFar);
+        // Replace the temp client ID with the real DB ID so execution results can be persisted
+        if (dbId) {
+          setMessages((prev) =>
+            prev.map((m) => (m.id === assistantMsgId ? { ...m, id: dbId } : m))
+          );
+          assistantMsgId = dbId;
+        }
         await supabase
           .from("conversations")
           .update({

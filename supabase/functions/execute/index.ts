@@ -316,10 +316,7 @@ serve(async (req) => {
       );
     }
 
-    // Validate attachments if provided
-    const validAttachments: AttachmentData[] | undefined = Array.isArray(attachments) 
-      ? attachments.filter((a: any) => a?.base64 && a?.mimeType && a?.fileName)
-      : undefined;
+    // validAttachments already computed above for cost calculation
 
     // Stability AI (binary image response)
     if (provider === "stability") {

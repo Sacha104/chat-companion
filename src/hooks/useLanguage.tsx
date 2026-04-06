@@ -148,6 +148,18 @@ const translations = {
   settings_reset_sending: { fr: "Envoi en cours…", en: "Sending…" },
   settings_reset_success: { fr: "Un lien de réinitialisation a été envoyé à votre adresse e-mail.", en: "A reset link has been sent to your email." },
   settings_reset_error: { fr: "Erreur lors de l'envoi du lien de réinitialisation.", en: "Error sending reset link." },
+
+  // ===== Reset Password Page =====
+  reset_password_title: { fr: "Nouveau mot de passe", en: "New Password" },
+  reset_password_desc: { fr: "Entrez votre nouveau mot de passe ci-dessous.", en: "Enter your new password below." },
+  reset_password_new: { fr: "Nouveau mot de passe", en: "New password" },
+  reset_password_confirm: { fr: "Confirmer le mot de passe", en: "Confirm password" },
+  reset_password_submit: { fr: "Mettre à jour", en: "Update" },
+  reset_password_back: { fr: "Retour à la connexion", en: "Back to login" },
+  reset_password_mismatch: { fr: "Les mots de passe ne correspondent pas.", en: "Passwords do not match." },
+  reset_password_too_short: { fr: "Le mot de passe doit contenir au moins 6 caractères.", en: "Password must be at least 6 characters." },
+  reset_password_error: { fr: "Erreur lors de la mise à jour du mot de passe.", en: "Error updating password." },
+  reset_password_success: { fr: "Mot de passe mis à jour avec succès !", en: "Password updated successfully!" },
   settings_signout: { fr: "Se déconnecter", en: "Sign out" },
 
   // ===== Pricing page =====

@@ -125,7 +125,7 @@ const Settings = () => {
               <p className="text-[11px] text-muted-foreground mt-0.5">{t("settings_credits_image")}</p>
             </div>
             <div className="rounded-xl border border-border bg-background px-3 py-3 text-center">
-              <p className="text-lg font-bold text-foreground tabular-nums">5</p>
+              <p className="text-lg font-bold text-foreground tabular-nums">10</p>
               <p className="text-[11px] text-muted-foreground mt-0.5">{t("settings_credits_video")}</p>
             </div>
           </div>

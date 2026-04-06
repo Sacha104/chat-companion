@@ -416,12 +416,22 @@ serve(async (req) => {
       });
     }
 
-    // RunwayML video generation
+    // RunwayML video generation (supports image-to-video)
     if (provider === "runwayml") {
+      const body: any = {
+        promptText: prompt,
+        model: "gen3a_turbo",
+        duration: 5,
+      };
+
+      if (validAttachments?.length && validAttachments[0].mimeType.startsWith("image/")) {
+        body.promptImage = `data:${validAttachments[0].mimeType};base64,${validAttachments[0].base64}`;
+      }
+
       const response = await fetch(cfg.url, {
         method: "POST",
         headers: { ...cfg.authHeader(apiKey), "Content-Type": "application/json" },
-        body: JSON.stringify(cfg.buildBody(prompt)),
+        body: JSON.stringify(body),
       });
 
       if (!response.ok) {
@@ -439,12 +449,22 @@ serve(async (req) => {
       });
     }
 
-    // Kling AI video generation
+    // Kling AI video generation (supports image-to-video)
     if (provider === "kling") {
+      const body: any = {
+        prompt,
+        duration: 5,
+        aspect_ratio: "16:9",
+      };
+
+      if (validAttachments?.length && validAttachments[0].mimeType.startsWith("image/")) {
+        body.image = `data:${validAttachments[0].mimeType};base64,${validAttachments[0].base64}`;
+      }
+
       const response = await fetch(cfg.url, {
         method: "POST",
         headers: { ...cfg.authHeader(apiKey), "Content-Type": "application/json" },
-        body: JSON.stringify(cfg.buildBody(prompt)),
+        body: JSON.stringify(body),
       });
 
       if (!response.ok) {

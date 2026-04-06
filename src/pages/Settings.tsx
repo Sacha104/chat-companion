@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, User, Mail, Coins, Zap, Shield, LogOut, Calendar } from "lucide-react";
+import { ArrowLeft, User, Mail, Coins, Zap, Shield, LogOut, Calendar, Sun, Moon, Palette } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useCredits } from "@/hooks/useCredits";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useTheme } from "@/hooks/useTheme";
 import { supabase } from "@/integrations/supabase/client";
 
 const Settings = () => {

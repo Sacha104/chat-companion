@@ -109,12 +109,7 @@ const translations = {
     fr: "Vous devez accepter les conditions d'utilisation et la politique de confidentialité.",
     en: "You must accept the terms of service and privacy policy.",
   },
-  login_otp_sent: { fr: "Un code de vérification a été envoyé à votre email", en: "A verification code has been sent to your email" },
-  login_verify_title: { fr: "Vérification", en: "Verification" },
-  login_verify_desc: { fr: "Entrez le code à 6 chiffres envoyé à", en: "Enter the 6-digit code sent to" },
-  login_verify_btn: { fr: "Vérifier", en: "Verify" },
-  login_resend: { fr: "Renvoyer le code", en: "Resend code" },
-  login_back: { fr: "Retour", en: "Back" },
+  login_check_email: { fr: "Un email de confirmation a été envoyé. Vérifiez votre boîte de réception.", en: "A confirmation email has been sent. Check your inbox." },
   login_verified: { fr: "Compte vérifié avec succès !", en: "Account verified successfully!" },
   login_code_resent: { fr: "Un nouveau code a été envoyé", en: "A new code has been sent" },
 

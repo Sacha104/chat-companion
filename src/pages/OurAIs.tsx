@@ -14,7 +14,7 @@ interface AIProvider {
 const providers: AIProvider[] = [
   { id: "openai", name: "OpenAI GPT", descKey: "ai_openai", logoUrl: "https://cdn.worldvectorlogo.com/logos/openai-2.svg", type: "text", website: "https://openai.com" },
   { id: "anthropic", name: "Claude (Anthropic)", descKey: "ai_anthropic", logoUrl: "https://anthropic.com/images/icons/apple-touch-icon.png", type: "text", website: "https://anthropic.com" },
-  { id: "gemini", name: "Google Gemini", descKey: "ai_gemini", logoUrl: "https://uxwing.com/wp-content/themes/flavor/flavor-flavor/flavor/flavor/flavor/flavflavor/flavour/flavour/gemini.png", type: "text", website: "https://deepmind.google/technologies/gemini/" },
+  { id: "gemini", name: "Google Gemini", descKey: "ai_gemini", logoUrl: "https://fonts.gstatic.com/s/i/productlogos/gemini/v8/web-64dp/logo_gemini_color_1x_web_64dp.png", type: "text", website: "https://deepmind.google/technologies/gemini/" },
   { id: "mistral", name: "Mistral AI", descKey: "ai_mistral", logoUrl: "https://avatars.githubusercontent.com/u/132372032?s=200&v=4", type: "text", website: "https://mistral.ai" },
   { id: "deepseek", name: "DeepSeek Coder", descKey: "ai_deepseek", logoUrl: "https://avatars.githubusercontent.com/u/148330874?s=200&v=4", type: "code", website: "https://deepseek.com" },
   { id: "stability", name: "Stability AI", descKey: "ai_stability", logoUrl: "https://avatars.githubusercontent.com/u/100950301?s=200&v=4", type: "image", website: "https://stability.ai" },

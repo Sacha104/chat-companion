@@ -462,7 +462,100 @@ serve(async (req) => {
       });
     }
 
-    // Chat/streaming providers (with multimodal support)
+    // Leonardo AI image generation
+    if (provider === "leonardo") {
+      const body: any = {
+        prompt,
+        modelId: "6b645e3a-d64f-4341-a6d8-7a3690fbf042",
+        width: 1024,
+        height: 1024,
+        num_images: 1,
+      };
+
+      // If image attachment, use init image for img2img
+      if (validAttachments?.length && validAttachments[0].mimeType.startsWith("image/")) {
+        body.init_image = `data:${validAttachments[0].mimeType};base64,${validAttachments[0].base64}`;
+        body.init_strength = 0.4;
+      }
+
+      const response = await fetch(cfg.url, {
+        method: "POST",
+        headers: { ...cfg.authHeader(apiKey), "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      if (!response.ok) {
+        await supabaseAdmin.rpc("add_credits", { p_user_id: userId, p_amount: cost });
+        const errText = await response.text();
+        console.error(`leonardo API error [${response.status}]:`, errText);
+        return new Response(JSON.stringify({ error: `Leonardo AI API error: ${response.status}` }), {
+          status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const data = await response.json();
+      const generationId = data.sdGenerationJob?.generationId;
+      // Leonardo returns a generation ID; poll for result
+      if (generationId) {
+        let imageUrl = "";
+        for (let i = 0; i < 30; i++) {
+          await new Promise(r => setTimeout(r, 2000));
+          const pollResp = await fetch(`https://cloud.leonardo.ai/api/rest/v1/generations/${generationId}`, {
+            headers: { ...cfg.authHeader(apiKey) },
+          });
+          if (pollResp.ok) {
+            const pollData = await pollResp.json();
+            const imgs = pollData.generations_by_pk?.generated_images;
+            if (imgs?.length) {
+              imageUrl = imgs[0].url;
+              break;
+            }
+          }
+        }
+        return new Response(JSON.stringify({ type: "image", url: imageUrl, remaining_credits: remaining }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      return new Response(JSON.stringify({ type: "image", url: "", remaining_credits: remaining }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Hailuo AI (MiniMax) video generation
+    if (provider === "hailuo") {
+      const body: any = {
+        prompt,
+        model: "video-01",
+      };
+
+      // If image attachment, use as first frame
+      if (validAttachments?.length && validAttachments[0].mimeType.startsWith("image/")) {
+        body.first_frame_image = `data:${validAttachments[0].mimeType};base64,${validAttachments[0].base64}`;
+      }
+
+      const response = await fetch(cfg.url, {
+        method: "POST",
+        headers: { ...cfg.authHeader(apiKey), "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      if (!response.ok) {
+        await supabaseAdmin.rpc("add_credits", { p_user_id: userId, p_amount: cost });
+        const errText = await response.text();
+        console.error(`hailuo API error [${response.status}]:`, errText);
+        return new Response(JSON.stringify({ error: `Hailuo AI API error: ${response.status}` }), {
+          status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const data = await response.json();
+      return new Response(JSON.stringify({ type: "video", taskId: data.task_id, status: data.status, remaining_credits: remaining }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // RunwayML - support image-to-video with attachment
     const response = await fetch(cfg.url, {
       method: "POST",
       headers: { ...cfg.authHeader(apiKey), "Content-Type": "application/json" },

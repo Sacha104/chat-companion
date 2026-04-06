@@ -13,6 +13,7 @@ const Settings = () => {
   const { user, signOut } = useAuth();
   const { credits, loading: creditsLoading } = useCredits();
   const { t, lang } = useLanguage();
+  const { theme, setTheme } = useTheme();
   const [changingPassword, setChangingPassword] = useState(false);
 
   const handlePasswordReset = async () => {

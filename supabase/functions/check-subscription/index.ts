@@ -10,8 +10,9 @@ const corsHeaders = {
 
 // Map product_id to credits amount
 const PRODUCT_CREDITS: Record<string, number> = {
-  "prod_UCBT1h1vwyRMNg": 100, // Starter
-  "prod_UCBUpVQjh4HJjX": 300, // Pro
+  "prod_UCBT1h1vwyRMNg": 150, // Starter
+  "prod_UCBUpVQjh4HJjX": 450, // Pro
+  "prod_UHp5W4PRqoVVJN": 1000, // Expert
 };
 
 serve(async (req) => {

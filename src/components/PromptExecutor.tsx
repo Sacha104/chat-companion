@@ -88,6 +88,11 @@ function suggestProviders(prompt: string, hasAttachments: boolean): AiSuggestion
     }
   }
 
+  // If attachments are present, only keep providers that support them
+  if (hasAttachments) {
+    return suggestions.filter(s => s.supportsAttachments).slice(0, 6);
+  }
+
   return suggestions.slice(0, 6);
 }
 

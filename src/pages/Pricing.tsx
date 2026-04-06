@@ -69,6 +69,10 @@ const Pricing = () => {
       key: "pro",
       features: [t("pricing_pro_f1"), t("pricing_feat_providers"), t("pricing_feat_history"), t("pricing_feat_priority"), t("pricing_feat_early")],
     },
+    {
+      key: "expert",
+      features: [t("pricing_expert_f1"), t("pricing_feat_providers"), t("pricing_feat_history"), t("pricing_feat_priority"), t("pricing_feat_early")],
+    },
   ];
 
   return (
@@ -84,7 +88,7 @@ const Pricing = () => {
       </header>
 
       <div className="flex-1 flex items-center justify-center px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl w-full">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl w-full">
           {plans.map(({ key, features }) => {
             const plan = PLANS[key];
             const isCurrent = currentPlan?.product_id === plan.product_id;

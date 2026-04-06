@@ -20,11 +20,17 @@ const LandingPricing = () => {
       features: [t("pricing_pro_f1"), t("pricing_pro_f2"), t("pricing_pro_f3")],
       popular: true,
     },
+    {
+      name: "Expert",
+      price: "50€",
+      features: [t("pricing_expert_f1"), t("pricing_expert_f2"), t("pricing_expert_f3")],
+      popular: false,
+    },
   ];
 
   return (
     <section className="py-28 px-6 lg:px-8 border-t border-border/30">
-      <div className="mx-auto max-w-4xl">
+      <div className="mx-auto max-w-5xl">
         <div className="text-center mb-16">
           <p className="text-xs font-medium tracking-widest uppercase text-primary mb-3">{t("pricing_title")}</p>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
@@ -32,7 +38,7 @@ const LandingPricing = () => {
           </h2>
         </div>
 
-        <div className="grid sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
+        <div className="grid sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
           {plans.map((plan) => (
             <div
               key={plan.name}

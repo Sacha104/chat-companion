@@ -1,17 +1,24 @@
 export const PLANS = {
   starter: {
     name: "Starter",
-    credits: 100,
+    credits: 150,
     price: 10,
     price_id: "price_1TDn6t2Ol3wRndcDFixxGTzo",
     product_id: "prod_UCBT1h1vwyRMNg",
   },
   pro: {
     name: "Pro",
-    credits: 300,
+    credits: 450,
     price: 25,
     price_id: "price_1TDn7A2Ol3wRndcDQ7o4Eb4n",
     product_id: "prod_UCBUpVQjh4HJjX",
+  },
+  expert: {
+    name: "Expert",
+    credits: 1000,
+    price: 50,
+    price_id: "price_1TJFRa2Ol3wRndcDq5K1WPm0",
+    product_id: "prod_UHp5W4PRqoVVJN",
   },
 } as const;
 

@@ -10,7 +10,7 @@ const corsHeaders = {
 const CREDIT_COSTS: Record<string, number> = {
   chat: 1,
   image: 2,
-  video: 5,
+  video: 10,
 };
 
 // Calculate attachment cost based on total size in bytes

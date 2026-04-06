@@ -13,6 +13,18 @@ const CREDIT_COSTS: Record<string, number> = {
   video: 5,
 };
 
+// Calculate attachment cost based on total size in bytes
+function calcAttachmentCost(attachments?: AttachmentData[]): number {
+  if (!attachments || attachments.length === 0) return 0;
+  // Sum total size of all attachments (base64 → ~75% of string length is actual bytes)
+  const totalBytes = attachments.reduce((sum, a) => sum + Math.ceil(a.base64.length * 0.75), 0);
+  const totalMB = totalBytes / (1024 * 1024);
+  if (totalMB <= 0) return 0;
+  if (totalMB <= 1) return 1;
+  if (totalMB <= 5) return 3;
+  return 5; // 5-20 MB
+}
+
 interface AttachmentData {
   base64: string;
   mimeType: string;

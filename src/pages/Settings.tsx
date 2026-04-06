@@ -171,7 +171,10 @@ const Settings = () => {
           </div>
         </section>
 
-
+        <section className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-5">
+          <div className="flex items-center gap-3 mb-1">
+            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <Shield className="h-5 w-5" />
             </div>
             <div>
               <h2 className="text-base font-semibold text-card-foreground">{t("settings_security")}</h2>

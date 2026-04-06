@@ -109,12 +109,27 @@ export interface ExecutionResult {
 
 const EXECUTE_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/execute`;
 
+// Credit costs matching backend logic
+const BASE_COSTS: Record<string, number> = { text: 1, code: 1, image: 2, video: 5 };
+
+function calcAttachmentCost(attachments?: Attachment[]): number {
+  if (!attachments || attachments.length === 0) return 0;
+  const totalBytes = attachments.reduce((sum, a) => sum + a.file.size, 0);
+  const totalMB = totalBytes / (1024 * 1024);
+  if (totalMB <= 0) return 0;
+  if (totalMB <= 1) return 1;
+  if (totalMB <= 5) return 3;
+  return 5;
+}
+
 const PromptExecutor = ({ prompt, attachments, onExecutionResult, onExecutionComplete, onCreditsChanged }: PromptExecutorProps) => {
   const [executing, setExecuting] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
 
   const hasAttachments = (attachments?.length ?? 0) > 0;
+  const attachCost = calcAttachmentCost(attachments);
   const suggestions = suggestProviders(prompt, hasAttachments);
+
 
   const handleExecute = async (suggestion: AiSuggestion) => {
     setSelectedProvider(suggestion.provider);

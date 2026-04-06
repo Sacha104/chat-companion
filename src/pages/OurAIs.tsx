@@ -78,14 +78,14 @@ const OurAIs = () => {
                 style={{ animationDelay: `${i * 70}ms` }}
               >
                 <div className="mb-4 flex items-start justify-between">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-secondary p-2">
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-white/10 p-2.5">
                     <img
                       src={provider.logoUrl}
                       alt={provider.name}
-                      className="h-8 w-8 object-contain"
+                      className="h-10 w-10 object-contain drop-shadow-md"
                       loading="lazy"
-                      width={32}
-                      height={32}
+                      width={40}
+                      height={40}
                     />
                   </div>
                   <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium ${tc.color}`}>

@@ -78,11 +78,11 @@ const OurAIs = () => {
                 style={{ animationDelay: `${i * 70}ms` }}
               >
                 <div className="mb-4 flex items-start justify-between">
-                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-white/10 p-2.5">
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-white p-2">
                     <img
                       src={provider.logoUrl}
                       alt={provider.name}
-                      className="h-10 w-10 object-contain drop-shadow-md"
+                      className="h-10 w-10 object-contain"
                       loading="lazy"
                       width={40}
                       height={40}

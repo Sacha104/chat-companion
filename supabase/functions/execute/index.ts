@@ -13,6 +13,18 @@ const CREDIT_COSTS: Record<string, number> = {
   video: 5,
 };
 
+// Calculate attachment cost based on total size in bytes
+function calcAttachmentCost(attachments?: AttachmentData[]): number {
+  if (!attachments || attachments.length === 0) return 0;
+  // Sum total size of all attachments (base64 → ~75% of string length is actual bytes)
+  const totalBytes = attachments.reduce((sum, a) => sum + Math.ceil(a.base64.length * 0.75), 0);
+  const totalMB = totalBytes / (1024 * 1024);
+  if (totalMB <= 0) return 0;
+  if (totalMB <= 1) return 1;
+  if (totalMB <= 5) return 3;
+  return 5; // 5-20 MB
+}
+
 interface AttachmentData {
   base64: string;
   mimeType: string;
@@ -262,7 +274,15 @@ serve(async (req) => {
     }
 
     const userId = userData.user.id;
-    const cost = CREDIT_COSTS[cfg.type] ?? 1;
+    
+    // Validate attachments early so we can calculate cost
+    const validAttachments: AttachmentData[] | undefined = Array.isArray(attachments) 
+      ? attachments.filter((a: any) => a?.base64 && a?.mimeType && a?.fileName)
+      : undefined;
+    
+    const baseCost = CREDIT_COSTS[cfg.type] ?? 1;
+    const attachmentCost = calcAttachmentCost(validAttachments);
+    const cost = baseCost + attachmentCost;
 
     const { data: remaining, error: deductError } = await supabaseAdmin.rpc("deduct_credits", {
       p_user_id: userId,
@@ -296,10 +316,7 @@ serve(async (req) => {
       );
     }
 
-    // Validate attachments if provided
-    const validAttachments: AttachmentData[] | undefined = Array.isArray(attachments) 
-      ? attachments.filter((a: any) => a?.base64 && a?.mimeType && a?.fileName)
-      : undefined;
+    // validAttachments already computed above for cost calculation
 
     // Stability AI (binary image response)
     if (provider === "stability") {

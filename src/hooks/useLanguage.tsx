@@ -219,6 +219,8 @@ const translations = {
   chat_conv_error: { fr: "Erreur lors de la création de la conversation", en: "Error creating conversation" },
   chat_stream_error: { fr: "Erreur lors de la communication avec l'IA", en: "Error communicating with AI" },
 
+  settings_attachment_title: { fr: "Surcoût pièces jointes", en: "Attachment surcharge" },
+
   // ===== Theme =====
   settings_appearance: { fr: "Apparence", en: "Appearance" },
   settings_appearance_desc: { fr: "Personnalisez l'apparence de l'application", en: "Customize the app's appearance" },

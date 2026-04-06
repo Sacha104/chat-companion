@@ -130,6 +130,24 @@ const Settings = () => {
             </div>
           </div>
 
+          <div className="rounded-xl border border-border bg-background p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70 mb-2">{t("settings_attachment_title")}</p>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="text-center">
+                <p className="text-sm font-bold text-foreground tabular-nums">+1</p>
+                <p className="text-[10px] text-muted-foreground">{"< 1 Mo"}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-sm font-bold text-foreground tabular-nums">+3</p>
+                <p className="text-[10px] text-muted-foreground">1 – 5 Mo</p>
+              </div>
+              <div className="text-center">
+                <p className="text-sm font-bold text-foreground tabular-nums">+5</p>
+                <p className="text-[10px] text-muted-foreground">5 – 20 Mo</p>
+              </div>
+            </div>
+          </div>
+
           <p className="text-xs text-muted-foreground">{t("settings_credits_note")}</p>
         </section>
 

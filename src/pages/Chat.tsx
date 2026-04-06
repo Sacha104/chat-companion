@@ -121,14 +121,16 @@ const Chat = () => {
     return data.id;
   };
 
-  const saveMessage = async (conversationId: string, role: string, content: string) => {
-    if (!user) return;
-    await supabase.from("messages").insert({
+  const saveMessage = async (conversationId: string, role: string, content: string): Promise<string | null> => {
+    if (!user) return null;
+    const { data, error } = await supabase.from("messages").insert({
       conversation_id: conversationId,
       user_id: user.id,
       role,
       content,
-    });
+    }).select("id").single();
+    if (error) { console.error("Error saving message:", error); return null; }
+    return data.id;
   };
 
   const handleSend = async (content: string, attachments: Attachment[]) => {
@@ -256,7 +258,14 @@ const Chat = () => {
       }
 
       if (assistantSoFar) {
-        await saveMessage(convId, "assistant", assistantSoFar);
+        const dbId = await saveMessage(convId, "assistant", assistantSoFar);
+        // Replace the temp client ID with the real DB ID so execution results can be persisted
+        if (dbId) {
+          setMessages((prev) =>
+            prev.map((m) => (m.id === assistantMsgId ? { ...m, id: dbId } : m))
+          );
+          assistantMsgId = dbId;
+        }
         await supabase
           .from("conversations")
           .update({

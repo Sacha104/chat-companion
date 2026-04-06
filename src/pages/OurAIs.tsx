@@ -66,13 +66,21 @@ const OurAIs = () => {
                 style={{ animationDelay: `${i * 70}ms` }}
               >
                 <div className="mb-4 flex items-start justify-between">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-secondary p-2">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-secondary p-2">
                     <img
                       src={provider.logoUrl}
                       alt={provider.name}
                       className="h-8 w-8 object-contain"
-                      onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                      onError={(e) => {
+                        const el = e.target as HTMLImageElement;
+                        el.style.display = "none";
+                        const fallback = el.parentElement?.querySelector(".fallback-letter");
+                        if (fallback) (fallback as HTMLElement).style.display = "flex";
+                      }}
                     />
+                    <span className="fallback-letter hidden h-8 w-8 items-center justify-center rounded-lg bg-primary/20 text-primary font-bold text-lg">
+                      {provider.name.charAt(0)}
+                    </span>
                   </div>
                   <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium ${tc.color}`}>
                     {tc.icon}

@@ -12,17 +12,17 @@ interface AIProvider {
 }
 
 const providers: AIProvider[] = [
-  { id: "openai", name: "OpenAI GPT", descKey: "ai_openai", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/OpenAI_Logo.svg/512px-OpenAI_Logo.svg.png", type: "text", website: "https://openai.com" },
+  { id: "openai", name: "OpenAI GPT", descKey: "ai_openai", logoUrl: "https://cdn.worldvectorlogo.com/logos/openai-2.svg", type: "text", website: "https://openai.com" },
   { id: "anthropic", name: "Claude (Anthropic)", descKey: "ai_anthropic", logoUrl: "https://anthropic.com/images/icons/apple-touch-icon.png", type: "text", website: "https://anthropic.com" },
-  { id: "gemini", name: "Google Gemini", descKey: "ai_gemini", logoUrl: "https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690b6.svg", type: "text", website: "https://deepmind.google/technologies/gemini/" },
-  { id: "mistral", name: "Mistral AI", descKey: "ai_mistral", logoUrl: "https://mistral.ai/images/logo_hugging_face.png", type: "text", website: "https://mistral.ai" },
+  { id: "gemini", name: "Google Gemini", descKey: "ai_gemini", logoUrl: "https://uxwing.com/wp-content/themes/flavor/flavor-flavor/flavor/flavor/flavor/flavflavor/flavour/flavour/gemini.png", type: "text", website: "https://deepmind.google/technologies/gemini/" },
+  { id: "mistral", name: "Mistral AI", descKey: "ai_mistral", logoUrl: "https://avatars.githubusercontent.com/u/132372032?s=200&v=4", type: "text", website: "https://mistral.ai" },
   { id: "deepseek", name: "DeepSeek Coder", descKey: "ai_deepseek", logoUrl: "https://avatars.githubusercontent.com/u/148330874?s=200&v=4", type: "code", website: "https://deepseek.com" },
-  { id: "stability", name: "Stability AI", descKey: "ai_stability", logoUrl: "https://images.crunchbase.com/image/upload/c_pad,f_auto,q_auto:eco,dpr_1/rglsmdkulmbxo6dq0trv", type: "image", website: "https://stability.ai" },
-  { id: "deepai", name: "DeepAI", descKey: "ai_deepai", logoUrl: "https://deepai.org/static/images/logo.svg", type: "image", website: "https://deepai.org" },
+  { id: "stability", name: "Stability AI", descKey: "ai_stability", logoUrl: "https://avatars.githubusercontent.com/u/100950301?s=200&v=4", type: "image", website: "https://stability.ai" },
+  { id: "deepai", name: "DeepAI", descKey: "ai_deepai", logoUrl: "https://avatars.githubusercontent.com/u/28962678?s=200&v=4", type: "image", website: "https://deepai.org" },
   { id: "leonardo", name: "Leonardo AI", descKey: "ai_leonardo", logoUrl: "https://avatars.githubusercontent.com/u/122753895?s=200&v=4", type: "image", website: "https://leonardo.ai" },
   { id: "runwayml", name: "RunwayML", descKey: "ai_runwayml", logoUrl: "https://avatars.githubusercontent.com/u/43209968?s=200&v=4", type: "video", website: "https://runwayml.com" },
-  { id: "kling", name: "Kling AI", descKey: "ai_kling", logoUrl: "https://klingai.com/favicon.ico", type: "video", website: "https://klingai.com" },
-  { id: "hailuo", name: "Hailuo AI", descKey: "ai_hailuo", logoUrl: "https://hailuoai.com/favicon.ico", type: "video", website: "https://hailuoai.com" },
+  { id: "kling", name: "Kling AI", descKey: "ai_kling", logoUrl: "https://avatars.githubusercontent.com/u/170592388?s=200&v=4", type: "video", website: "https://klingai.com" },
+  { id: "hailuo", name: "Hailuo AI", descKey: "ai_hailuo", logoUrl: "https://avatars.githubusercontent.com/u/137651451?s=200&v=4", type: "video", website: "https://hailuoai.com" },
 ];
 
 const OurAIs = () => {

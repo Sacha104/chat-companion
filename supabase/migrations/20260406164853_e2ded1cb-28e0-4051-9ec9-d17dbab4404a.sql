@@ -1,0 +1,6 @@
+DROP POLICY "Users can update own messages" ON public.messages;
+CREATE POLICY "Users can update own messages"
+  ON public.messages FOR UPDATE
+  TO authenticated
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id AND role = 'user');

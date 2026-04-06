@@ -5,7 +5,55 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
+  /* ===== Light Theme ===== */
+  :root,
+  .light {
+    --background: 220 20% 97%;
+    --foreground: 225 15% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 225 15% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 225 15% 12%;
+
+    --primary: 210 100% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 15% 92%;
+    --secondary-foreground: 225 10% 35%;
+
+    --muted: 220 12% 90%;
+    --muted-foreground: 220 10% 45%;
+
+    --accent: 210 80% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 220 12% 88%;
+    --input: 220 12% 90%;
+    --ring: 210 100% 50%;
+
+    --radius: 0.625rem;
+
+    --sidebar-bg: 220 18% 95%;
+    --sidebar-fg: 220 10% 35%;
+    --sidebar-border: 220 12% 88%;
+    --sidebar-hover: 220 15% 92%;
+    --sidebar-active: 220 15% 88%;
+
+    --chat-input-bg: 0 0% 100%;
+    --chat-bubble-user: 210 60% 95%;
+    --chat-bubble-ai: 220 15% 96%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(210, 100%, 50%), hsl(230, 80%, 60%));
+    --shadow-glow: 0 0 60px -12px hsl(210 100% 50% / 0.12);
+  }
+
+  /* ===== Dark Theme ===== */
+  .dark {
     --background: 225 15% 7%;
     --foreground: 220 15% 93%;
 

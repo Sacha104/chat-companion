@@ -19,10 +19,12 @@ const ALL_PROVIDERS: AiSuggestion[] = [
   { provider: "gemini", label: "Google Gemini", description: "Multimodal & rapide", icon: <Type className="h-4 w-4" />, type: "text", supportsAttachments: true },
   { provider: "mistral", label: "Mistral AI", description: "IA française performante", icon: <Type className="h-4 w-4" />, type: "text", supportsAttachments: false },
   { provider: "deepseek", label: "DeepSeek Coder", description: "Spécialisé code", icon: <Code className="h-4 w-4" />, type: "code", supportsAttachments: false },
-  { provider: "stability", label: "Stability AI", description: "Génération d'images HD", icon: <Image className="h-4 w-4" />, type: "image", supportsAttachments: false },
-  { provider: "deepai", label: "DeepAI", description: "Images rapides", icon: <Image className="h-4 w-4" />, type: "image", supportsAttachments: false },
-  { provider: "runwayml", label: "RunwayML", description: "Vidéo & animation", icon: <Video className="h-4 w-4" />, type: "video", supportsAttachments: false },
-  { provider: "kling", label: "Kling AI", description: "Vidéo IA avancée", icon: <Video className="h-4 w-4" />, type: "video", supportsAttachments: false },
+  { provider: "stability", label: "Stability AI", description: "Image depuis texte/photo", icon: <Image className="h-4 w-4" />, type: "image", supportsAttachments: true },
+  { provider: "deepai", label: "DeepAI", description: "Image depuis texte/photo", icon: <Image className="h-4 w-4" />, type: "image", supportsAttachments: true },
+  { provider: "leonardo", label: "Leonardo AI", description: "Image HD depuis texte/photo", icon: <Image className="h-4 w-4" />, type: "image", supportsAttachments: true },
+  { provider: "runwayml", label: "RunwayML", description: "Vidéo depuis texte/photo", icon: <Video className="h-4 w-4" />, type: "video", supportsAttachments: true },
+  { provider: "kling", label: "Kling AI", description: "Vidéo depuis texte/photo", icon: <Video className="h-4 w-4" />, type: "video", supportsAttachments: true },
+  { provider: "hailuo", label: "Hailuo AI", description: "Vidéo depuis texte/photo", icon: <Video className="h-4 w-4" />, type: "video", supportsAttachments: true },
 ];
 
 const fileToBase64 = (file: File): Promise<string> =>

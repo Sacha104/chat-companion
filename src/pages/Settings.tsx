@@ -20,7 +20,7 @@ const Settings = () => {
     if (!user?.email) return;
     setChangingPassword(true);
     const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
-      redirectTo: window.location.origin + "/settings",
+      redirectTo: window.location.origin + "/reset-password",
     });
     if (error) {
       toast.error(t("settings_reset_error"));

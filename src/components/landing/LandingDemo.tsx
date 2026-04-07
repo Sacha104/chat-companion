@@ -45,7 +45,7 @@ const LandingDemo = () => {
               <div className="h-2.5 w-2.5 rounded-full bg-destructive/60" />
               <div className="h-2.5 w-2.5 rounded-full bg-yellow-500/60" />
               <div className="h-2.5 w-2.5 rounded-full bg-green-500/60" />
-              <span className="ml-3 text-xs text-muted-foreground font-medium">Pr@mpt</span>
+              <span className="ml-3 text-xs text-muted-foreground font-medium">Tornado</span>
             </div>
             <div className="p-5 space-y-4">
               <div>

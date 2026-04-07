@@ -21,13 +21,13 @@ interface MagicLinkEmailProps {
 export const MagicLinkEmail = ({ siteName, confirmationUrl }: MagicLinkEmailProps) => (
   <Html lang="fr" dir="ltr">
     <Head />
-    <Preview>Votre lien de connexion Pr@mpt</Preview>
+    <Preview>Votre lien de connexion Tornado</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={brand}>Pr@mpt</Heading>
+        <Heading style={brand}>Tornado</Heading>
         <Heading style={h1}>Votre lien de connexion</Heading>
         <Text style={text}>
-          Cliquez sur le bouton ci-dessous pour vous connecter à Pr@mpt. Ce lien expirera bientôt.
+          Cliquez sur le bouton ci-dessous pour vous connecter à Tornado. Ce lien expirera bientôt.
         </Text>
         <Button style={button} href={confirmationUrl}>
           Se connecter

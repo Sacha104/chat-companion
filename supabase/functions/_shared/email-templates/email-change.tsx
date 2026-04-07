@@ -24,13 +24,13 @@ interface EmailChangeEmailProps {
 export const EmailChangeEmail = ({ siteName, email, newEmail, confirmationUrl }: EmailChangeEmailProps) => (
   <Html lang="fr" dir="ltr">
     <Head />
-    <Preview>Confirmez le changement d'e-mail pour Pr@mpt</Preview>
+    <Preview>Confirmez le changement d'e-mail pour Tornado</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={brand}>Pr@mpt</Heading>
+        <Heading style={brand}>Tornado</Heading>
         <Heading style={h1}>Confirmez le changement d'e-mail</Heading>
         <Text style={text}>
-          Vous avez demandé à changer votre adresse e-mail pour Pr@mpt de{' '}
+          Vous avez demandé à changer votre adresse e-mail pour Tornado de{' '}
           <Link href={`mailto:${email}`} style={link}>{email}</Link>{' '}
           à{' '}
           <Link href={`mailto:${newEmail}`} style={link}>{newEmail}</Link>.

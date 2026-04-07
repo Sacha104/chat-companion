@@ -7,7 +7,7 @@ project_id = "boipukusgnipdxwmlbeb"
     [auth.email.template]
       [auth.email.template.confirmation]
         content_path = "./supabase/templates/confirmation.html"
-        subject = "Votre code de vérification Pr@mpt"
+        subject = "Votre code de vérification Tornado"
 
 [functions]
   [functions.auth-email-hook]

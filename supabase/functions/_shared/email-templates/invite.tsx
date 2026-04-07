@@ -23,14 +23,14 @@ interface InviteEmailProps {
 export const InviteEmail = ({ siteName, siteUrl, confirmationUrl }: InviteEmailProps) => (
   <Html lang="fr" dir="ltr">
     <Head />
-    <Preview>Vous avez été invité à rejoindre Pr@mpt</Preview>
+    <Preview>Vous avez été invité à rejoindre Tornado</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={brand}>Pr@mpt</Heading>
+        <Heading style={brand}>Tornado</Heading>
         <Heading style={h1}>Vous avez été invité</Heading>
         <Text style={text}>
           Vous avez été invité à rejoindre{' '}
-          <Link href={siteUrl} style={link}><strong>Pr@mpt</strong></Link>.
+          <Link href={siteUrl} style={link}><strong>Tornado</strong></Link>.
           Cliquez sur le bouton ci-dessous pour accepter l'invitation et créer votre compte.
         </Text>
         <Button style={button} href={confirmationUrl}>

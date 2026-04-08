@@ -96,7 +96,7 @@ const PrivacyPolicy = () => {
         <h2 className="text-base font-semibold text-foreground mt-8 mb-3">10. Contact</h2>
         <p className="text-sm text-muted-foreground leading-relaxed mb-4">
           Pour toute question relative à cette politique, vous pouvez nous contacter par email à :
-          <span className="text-primary"> contact@votredomaine.com</span>
+          <a href="mailto:support@tornadoprompt.com" className="text-primary hover:underline"> support@tornadoprompt.com</a>
         </p>
       </main>
     </div>

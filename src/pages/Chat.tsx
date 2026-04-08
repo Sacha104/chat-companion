@@ -464,12 +464,38 @@ const Chat = () => {
                                   </div>
 
                                   {executionResults[msg.id].type === "image" && (
-                                    <div className="rounded-lg overflow-hidden">
+                                    <div className="rounded-lg overflow-hidden relative group/media">
                                       <img
                                         src={executionResults[msg.id].imageData || executionResults[msg.id].imageUrl}
                                         alt="Generated"
                                         className="max-w-full rounded-lg"
                                       />
+                                      <a
+                                        href={executionResults[msg.id].imageData || executionResults[msg.id].imageUrl}
+                                        download={`tornado-image-${msg.id}.png`}
+                                        className="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-lg bg-background/80 backdrop-blur-sm border border-border text-muted-foreground opacity-0 group-hover/media:opacity-100 transition-all hover:text-foreground hover:bg-background"
+                                        title="Télécharger"
+                                      >
+                                        <Download className="h-4 w-4" />
+                                      </a>
+                                    </div>
+                                  )}
+
+                                  {executionResults[msg.id].type === "video" && executionResults[msg.id].imageUrl && (
+                                    <div className="rounded-lg overflow-hidden relative group/media">
+                                      <video
+                                        src={executionResults[msg.id].imageUrl}
+                                        controls
+                                        className="max-w-full rounded-lg"
+                                      />
+                                      <a
+                                        href={executionResults[msg.id].imageUrl}
+                                        download={`tornado-video-${msg.id}.mp4`}
+                                        className="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-lg bg-background/80 backdrop-blur-sm border border-border text-muted-foreground opacity-0 group-hover/media:opacity-100 transition-all hover:text-foreground hover:bg-background"
+                                        title="Télécharger"
+                                      >
+                                        <Download className="h-4 w-4" />
+                                      </a>
                                     </div>
                                   )}
 

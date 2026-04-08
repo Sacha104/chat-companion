@@ -455,6 +455,8 @@ const Chat = () => {
                                   <div className="flex items-center gap-2 mb-2 text-xs font-semibold text-muted-foreground">
                                     {executionResults[msg.id].type === "image" ? (
                                       <ImageIcon className="h-3.5 w-3.5" />
+                                    ) : executionResults[msg.id].type === "video" ? (
+                                      <Video className="h-3.5 w-3.5" />
                                     ) : executionResults[msg.id].type === "code" ? (
                                       <Code className="h-3.5 w-3.5" />
                                     ) : (

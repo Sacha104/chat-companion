@@ -97,7 +97,7 @@ const TermsOfService = () => {
         <h2 className="text-base font-semibold text-foreground mt-8 mb-3">11. Contact</h2>
         <p className="text-sm text-muted-foreground leading-relaxed mb-4">
           Pour toute question relative à ces conditions, contactez-nous à :
-          <span className="text-primary"> contact@votredomaine.com</span>
+          <a href="mailto:support@tornado.com" className="text-primary hover:underline"> support@tornado.com</a>
         </p>
       </main>
     </div>

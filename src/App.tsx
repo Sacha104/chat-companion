@@ -18,6 +18,8 @@ import TermsOfService from "./pages/TermsOfService";
 import Settings from "./pages/Settings";
 import Landing from "./pages/Landing";
 import ResetPassword from "./pages/ResetPassword";
+import Contact from "./pages/Contact";
+import Unsubscribe from "./pages/Unsubscribe";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +45,8 @@ const App = () => (
                 <Route path="/privacy" element={<PrivacyPolicy />} />
                 <Route path="/terms" element={<TermsOfService />} />
                 <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/unsubscribe" element={<Unsubscribe />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </AuthProvider>

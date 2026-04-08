@@ -10,8 +10,8 @@ const translations = {
   hero_title_1: { fr: "Vos prompts,", en: "Your prompts," },
   hero_title_2: { fr: "optimisés par l'IA.", en: "optimized by AI." },
   hero_desc: {
-    fr: "Tornado génère des prompts optimisés pour chaque IA — ChatGPT, Claude, Gemini, Grok et bien d'autres. Obtenez les meilleurs résultats en texte, code, image et vidéo, automatiquement.",
-    en: "Tornado generates optimized prompts for every AI — ChatGPT, Claude, Gemini, Grok and many more. Get the best results in text, code, image and video, automatically.",
+    fr: "Tornado génère des prompts optimisés pour chaque IA — OpenAI GPT, DeepSeek Coder, DeepAI et RunwayML. Obtenez les meilleurs résultats en texte, code, image et vidéo, automatiquement.",
+    en: "Tornado generates optimized prompts for every AI — OpenAI GPT, DeepSeek Coder, DeepAI and RunwayML. Get the best results in text, code, image and video, automatically.",
   },
   hero_cta: { fr: "Créer un compte gratuit", en: "Create a free account" },
   hero_discover: { fr: "Découvrir", en: "Discover" },
@@ -27,8 +27,8 @@ const translations = {
   },
   feat2_title: { fr: "Multi-IA unifié", en: "Unified Multi-AI" },
   feat2_desc: {
-    fr: "Accédez à GPT, Claude, Gemini, Grok et plus encore depuis une seule interface. Pas besoin de compte sur chaque plateforme.",
-    en: "Access GPT, Claude, Gemini, Grok and more from a single interface. No need for an account on each platform.",
+    fr: "Accédez à OpenAI GPT, DeepSeek Coder, DeepAI et RunwayML depuis une seule interface. Pas besoin de compte sur chaque plateforme.",
+    en: "Access OpenAI GPT, DeepSeek Coder, DeepAI and RunwayML from a single interface. No need for an account on each platform.",
   },
   feat3_title: { fr: "Données sécurisées", en: "Secure Data" },
   feat3_desc: {

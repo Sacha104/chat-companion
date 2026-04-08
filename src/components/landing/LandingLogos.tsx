@@ -1,4 +1,4 @@
-const models = ["OpenAI GPT", "Claude", "Gemini", "Grok", "Mistral", "DALL·E"];
+const models = ["OpenAI GPT", "DeepSeek Coder", "DeepAI", "RunwayML"];
 
 const LandingLogos = () => (
   <section className="py-10 border-y border-border/30">

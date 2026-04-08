@@ -15,16 +15,9 @@ interface AiSuggestion {
 
 const ALL_PROVIDERS: AiSuggestion[] = [
   { provider: "openai", label: "OpenAI GPT", description: "Texte & code polyvalent", icon: <Type className="h-4 w-4" />, type: "text", supportsAttachments: true },
-  { provider: "anthropic", label: "Claude", description: "Raisonnement & analyse", icon: <Type className="h-4 w-4" />, type: "text", supportsAttachments: true },
-  { provider: "gemini", label: "Google Gemini", description: "Multimodal & rapide", icon: <Type className="h-4 w-4" />, type: "text", supportsAttachments: true },
-  { provider: "mistral", label: "Mistral AI", description: "IA française performante", icon: <Type className="h-4 w-4" />, type: "text", supportsAttachments: false },
   { provider: "deepseek", label: "DeepSeek Coder", description: "Spécialisé code", icon: <Code className="h-4 w-4" />, type: "code", supportsAttachments: false },
-  { provider: "stability", label: "Stability AI", description: "Image depuis texte/photo", icon: <Image className="h-4 w-4" />, type: "image", supportsAttachments: true },
   { provider: "deepai", label: "DeepAI", description: "Image depuis texte/photo", icon: <Image className="h-4 w-4" />, type: "image", supportsAttachments: true },
-  { provider: "leonardo", label: "Leonardo AI", description: "Image HD depuis texte/photo", icon: <Image className="h-4 w-4" />, type: "image", supportsAttachments: true },
   { provider: "runwayml", label: "RunwayML", description: "Vidéo depuis texte/photo", icon: <Video className="h-4 w-4" />, type: "video", supportsAttachments: true },
-  { provider: "kling", label: "Kling AI", description: "Vidéo depuis texte/photo", icon: <Video className="h-4 w-4" />, type: "video", supportsAttachments: true },
-  { provider: "hailuo", label: "Hailuo AI", description: "Vidéo depuis texte/photo", icon: <Video className="h-4 w-4" />, type: "video", supportsAttachments: true },
 ];
 
 const fileToBase64 = (file: File): Promise<string> =>
@@ -42,9 +35,8 @@ function suggestProviders(prompt: string, hasAttachments: boolean): AiSuggestion
   // If attachments are present, prioritize multimodal providers
   if (hasAttachments) {
     suggestions.push(
-      ALL_PROVIDERS.find(p => p.provider === "gemini")!,
       ALL_PROVIDERS.find(p => p.provider === "openai")!,
-      ALL_PROVIDERS.find(p => p.provider === "anthropic")!,
+      ALL_PROVIDERS.find(p => p.provider === "deepai")!,
     );
   }
 
@@ -53,34 +45,26 @@ function suggestProviders(prompt: string, hasAttachments: boolean): AiSuggestion
   const hasCode = /\b(code|program|script|function|algorithm|api|développ|develop|debug|html|css|javascript|python|react|sql)\b/i.test(lower);
 
   if (hasImage) {
-    const stability = ALL_PROVIDERS.find(p => p.provider === "stability")!;
     const deepai = ALL_PROVIDERS.find(p => p.provider === "deepai")!;
-    if (!suggestions.find(s => s.provider === stability.provider)) suggestions.push(stability);
     if (!suggestions.find(s => s.provider === deepai.provider)) suggestions.push(deepai);
   }
 
   if (hasVideo) {
     const runway = ALL_PROVIDERS.find(p => p.provider === "runwayml")!;
-    const kling = ALL_PROVIDERS.find(p => p.provider === "kling")!;
     if (!suggestions.find(s => s.provider === runway.provider)) suggestions.push(runway);
-    if (!suggestions.find(s => s.provider === kling.provider)) suggestions.push(kling);
   }
 
   if (hasCode) {
     const deepseek = ALL_PROVIDERS.find(p => p.provider === "deepseek")!;
     const openai = ALL_PROVIDERS.find(p => p.provider === "openai")!;
-    const anthropic = ALL_PROVIDERS.find(p => p.provider === "anthropic")!;
     if (!suggestions.find(s => s.provider === deepseek.provider)) suggestions.push(deepseek);
     if (!suggestions.find(s => s.provider === openai.provider)) suggestions.push(openai);
-    if (!suggestions.find(s => s.provider === anthropic.provider)) suggestions.push(anthropic);
   }
 
   if (suggestions.length === 0) {
     suggestions.push(
       ALL_PROVIDERS.find(p => p.provider === "openai")!,
-      ALL_PROVIDERS.find(p => p.provider === "anthropic")!,
-      ALL_PROVIDERS.find(p => p.provider === "gemini")!,
-      ALL_PROVIDERS.find(p => p.provider === "mistral")!,
+      ALL_PROVIDERS.find(p => p.provider === "deepseek")!,
     );
   }
 

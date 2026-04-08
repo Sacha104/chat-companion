@@ -68,7 +68,7 @@ const LandingDemo = () => {
               <div>
                 <p className="text-[10px] font-medium text-muted-foreground mb-2 uppercase tracking-widest">{t("prompts_suggestion")}</p>
                 <div className="flex flex-wrap gap-1.5">
-                  {["Stability AI", "DALL·E", "DeepAI"].map((name) => (
+                  {["DeepAI", "OpenAI GPT", "RunwayML"].map((name) => (
                     <span key={name} className="inline-flex items-center rounded-md border border-border/40 bg-secondary/40 px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
                       {name}
                     </span>

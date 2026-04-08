@@ -10,7 +10,13 @@ const corsHeaders = {
 // Supported providers — extend this map to add more AI APIs
 const PROVIDERS: Record<
   string,
-  { envKey: string; url: string; buildBody: (messages: any[], model?: string) => any; authHeader: (key: string) => Record<string, string>; stream: boolean }
+  {
+    envKey: string;
+    url: string;
+    buildBody: (messages: any[], model?: string) => any;
+    authHeader: (key: string) => Record<string, string>;
+    stream: boolean;
+  }
 > = {
   openai: {
     envKey: "OPENAI_API_KEY",
@@ -119,19 +125,16 @@ serve(async (req) => {
 
     // --- Credit check (1 credit per prompt generation) ---
     const authHeader = req.headers.get("Authorization");
-    const supabaseAdmin = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
+    const supabaseAdmin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
     let userId: string | null = null;
     if (authHeader) {
       const token = authHeader.replace("Bearer ", "");
-      const supabaseUser = createClient(
-        Deno.env.get("SUPABASE_URL")!,
-        Deno.env.get("SUPABASE_ANON_KEY")!,
-        { global: { headers: { Authorization: `Bearer ${token}` } } },
-      );
-      const { data: { user } } = await supabaseUser.auth.getUser();
+      const supabaseUser = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, {
+        global: { headers: { Authorization: `Bearer ${token}` } },
+      });
+      const {
+        data: { user },
+      } = await supabaseUser.auth.getUser();
       userId = user?.id ?? null;
     }
 
@@ -143,10 +146,13 @@ serve(async (req) => {
       if (creditError) {
         const msg = creditError.message || "";
         if (msg.includes("INSUFFICIENT_CREDITS")) {
-          return new Response(JSON.stringify({ error: "Crédits insuffisants. Rechargez vos crédits pour continuer." }), {
-            status: 402,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify({ error: "Crédits insuffisants. Rechargez vos crédits pour continuer." }),
+            {
+              status: 402,
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            },
+          );
         }
         console.error("Credit deduction error:", creditError);
       }
@@ -156,29 +162,56 @@ serve(async (req) => {
     if (!cfg) {
       return new Response(
         JSON.stringify({ error: `Unknown provider: ${provider}. Available: ${Object.keys(PROVIDERS).join(", ")}` }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
     const apiKey = Deno.env.get(cfg.envKey);
     if (!apiKey) {
-      return new Response(
-        JSON.stringify({ error: `${cfg.envKey} is not configured. Add it in project secrets.` }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: `${cfg.envKey} is not configured. Add it in project secrets.` }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const systemMessage = {
       role: "system",
-      content: `Tu es un expert en ingénierie de prompts (prompt engineering). Ton rôle est de transformer la demande de l'utilisateur en un prompt optimisé, clair et structuré, prêt à être utilisé avec une IA comme ChatGPT, Claude, Gemini, etc.
+      content: `Tu es un expert en ingénierie de prompt, spécialisé dans la création de prompts ultra-performants pour les modèles de langage.
 
-Règles :
-- Génère UNIQUEMENT le prompt optimisé, rien d'autre.
-- Ne réponds pas à la question de l'utilisateur.
-- Le prompt doit être précis, actionnable et bien structuré.
-- Utilise des instructions claires (rôle, contexte, format de sortie, contraintes).
-- Si la demande est vague, enrichis-la intelligemment.
-- Réponds dans la langue de l'utilisateur.`,
+Ta mission est de générer le prompt parfait, optimisé pour obtenir une réponse de très haute qualité de ChatGPT.
+
+Avant de rédiger ce prompt, tu dois :
+1. Identifier clairement l’objectif de l’utilisateur
+2. Déduire le niveau d’expertise attendu (débutant, intermédiaire, expert)
+3. Déterminer le format de sortie idéal (liste, plan, texte, tableau, code, etc.)
+4. Anticiper les ambiguïtés et les éliminer
+5. Ajouter des contraintes précises pour améliorer la qualité de la réponse
+
+Ensuite, construis le prompt en respectant cette structure :
+
+- Contexte : expliquer clairement la situation et l’objectif
+- Rôle : définir un rôle expert précis que ChatGPT doit adopter
+- Tâche : décrire exactement ce que ChatGPT doit faire
+- Contraintes : inclure des exigences spécifiques (style, longueur, ton, précision, sources, etc.)
+- Format de sortie : imposer une structure de réponse claire
+- Critères de qualité : définir ce qui rendra la réponse excellente
+
+Le prompt doit être :
+- Clair, sans ambiguïté
+- Structuré et hiérarchisé
+- Directement exploitable sans modification
+- Suffisamment détaillé pour éviter les réponses vagues
+- Adapté à des résultats professionnels
+
+IMPORTANT :
+- N’écris QUE le prompt final
+- Ne donne aucune explication
+- Réponds dans la langue de l'utilisateur.
+- Utilise un langage précis et optimisé
+- Si des informations sont manquantes, fais des hypothèses pertinentes et explicites-les dans le prompt
+
+Objectif utilisateur :
+`,
     };
 
     const response = await fetch(cfg.url, {
@@ -241,7 +274,9 @@ Règles :
                     const normalized = { choices: [{ delta: { content: evt.delta.text } }] };
                     controller.enqueue(encoder.encode(`data: ${JSON.stringify(normalized)}\n\n`));
                   }
-                } catch { /* skip */ }
+                } catch {
+                  /* skip */
+                }
               }
             }
           },
@@ -265,9 +300,9 @@ Règles :
     }
   } catch (e) {
     console.error("chat function error:", e);
-    return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });

@@ -96,9 +96,12 @@ export interface ExecutionResult {
   content?: string;
   imageUrl?: string;
   imageData?: string;
+  taskId?: string;
+  status?: string;
 }
 
 const EXECUTE_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/execute`;
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // Credit costs matching backend logic
 const BASE_COSTS: Record<string, number> = { text: 1, code: 1, image: 2, video: 5 };
@@ -121,6 +124,42 @@ const PromptExecutor = ({ prompt, attachments, onExecutionResult, onExecutionCom
   const attachCost = calcAttachmentCost(attachments);
   const suggestions = suggestProviders(prompt, hasAttachments);
 
+  const pollVideoResult = async (provider: string, taskId: string, token: string): Promise<ExecutionResult> => {
+    for (let attempt = 0; attempt < 45; attempt += 1) {
+      if (attempt > 0) await wait(4000);
+
+      const pollResp = await fetch(EXECUTE_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ provider, taskId }),
+      });
+
+      const pollData = await pollResp.json().catch(() => ({}));
+      if (!pollResp.ok) {
+        throw new Error(typeof pollData.error === "string" ? pollData.error : `Erreur ${pollResp.status}`);
+      }
+
+      const status = typeof pollData.status === "string" ? pollData.status.toLowerCase() : "processing";
+      if (status === "succeeded" && typeof pollData.url === "string") {
+        return {
+          provider,
+          type: "video",
+          imageUrl: pollData.url,
+          taskId,
+          status,
+        };
+      }
+
+      if (status === "failed" || status === "cancelled") {
+        throw new Error(typeof pollData.error === "string" ? pollData.error : "La génération vidéo a échoué.");
+      }
+    }
+
+    throw new Error("La génération vidéo prend trop de temps. Réessaie dans quelques instants.");
+  };
 
   const handleExecute = async (suggestion: AiSuggestion) => {
     setSelectedProvider(suggestion.provider);
@@ -131,11 +170,9 @@ const PromptExecutor = ({ prompt, attachments, onExecutionResult, onExecutionCom
       const token = session?.access_token;
       if (!token) {
         toast.error("Vous devez être connecté pour exécuter une requête.");
-        setExecuting(false);
         return;
       }
 
-      // Prepare attachments as base64 for multimodal providers
       let attachmentData: Array<{ base64: string; mimeType: string; fileName: string }> | undefined;
       if (hasAttachments && suggestion.supportsAttachments) {
         attachmentData = await Promise.all(
@@ -164,28 +201,71 @@ const PromptExecutor = ({ prompt, attachments, onExecutionResult, onExecutionCom
         const err = await resp.json().catch(() => ({ error: "Erreur inconnue" }));
         if (resp.status === 402) {
           toast.error("Crédits insuffisants ! Rechargez vos crédits pour continuer.");
-          setExecuting(false);
           return;
         }
-        throw new Error(err.error || `Erreur ${resp.status}`);
+        throw new Error(typeof err.error === "string" ? err.error : `Erreur ${resp.status}`);
       }
 
-      // Image / non-streaming response
-      if (suggestion.type === "image") {
+      const contentType = resp.headers.get("content-type") ?? "";
+      if (contentType.includes("application/json")) {
         const data = await resp.json();
-        const imageResult: ExecutionResult = {
+
+        if (data.type === "image") {
+          const imageResult: ExecutionResult = {
+            provider: suggestion.provider,
+            type: "image",
+            imageUrl: data.url,
+            imageData: data.data,
+          };
+          onExecutionResult(imageResult);
+          onExecutionComplete?.(imageResult);
+          return;
+        }
+
+        if (data.type === "video") {
+          const taskId = typeof data.taskId === "string" ? data.taskId : undefined;
+          const currentStatus = typeof data.status === "string" ? data.status.toLowerCase() : undefined;
+
+          if (taskId && !data.url) {
+            onExecutionResult({
+              provider: suggestion.provider,
+              type: "text",
+              content: "🎬 Génération vidéo en cours...",
+              taskId,
+              status: currentStatus,
+            });
+          }
+
+          const videoResult = typeof data.url === "string"
+            ? {
+                provider: suggestion.provider,
+                type: "video" as const,
+                imageUrl: data.url,
+                taskId,
+                status: currentStatus ?? "succeeded",
+              }
+            : taskId
+              ? await pollVideoResult(suggestion.provider, taskId, token)
+              : (() => {
+                  throw new Error("Aucune vidéo n’a été retournée.");
+                })();
+
+          onExecutionResult(videoResult);
+          onExecutionComplete?.(videoResult);
+          return;
+        }
+
+        const rawContent = data.content ?? data.output ?? data.result;
+        const textResult: ExecutionResult = {
           provider: suggestion.provider,
-          type: "image",
-          imageUrl: data.url,
-          imageData: data.data,
+          type: suggestion.type === "code" ? "code" : "text",
+          content: typeof rawContent === "string" ? rawContent : JSON.stringify(rawContent ?? ""),
         };
-        onExecutionResult(imageResult);
-        onExecutionComplete?.(imageResult);
-        setExecuting(false);
+        onExecutionResult(textResult);
+        onExecutionComplete?.(textResult);
         return;
       }
 
-      // Streaming text/code response
       if (!resp.body) throw new Error("Pas de stream");
 
       const reader = resp.body.getReader();
@@ -223,7 +303,6 @@ const PromptExecutor = ({ prompt, attachments, onExecutionResult, onExecutionCom
           }
         }
       }
-      // Notify completion with final content
 
       if (fullContent) {
         onExecutionComplete?.({
@@ -234,11 +313,13 @@ const PromptExecutor = ({ prompt, attachments, onExecutionResult, onExecutionCom
       }
     } catch (e: any) {
       console.error("Execution error:", e);
-      onExecutionResult({
+      const errorResult: ExecutionResult = {
         provider: suggestion.provider,
         type: "text",
         content: `❌ Erreur : ${e.message}`,
-      });
+      };
+      onExecutionResult(errorResult);
+      onExecutionComplete?.(errorResult);
     } finally {
       setExecuting(false);
       onCreditsChanged?.();

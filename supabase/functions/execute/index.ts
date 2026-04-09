@@ -254,14 +254,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { prompt, provider, model, attachments } = await req.json();
-
-    if (!prompt || typeof prompt !== "string") {
-      return new Response(JSON.stringify({ error: "prompt string is required" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    const { prompt, provider, model, attachments, taskId } = await req.json();
 
     const cfg = PROVIDERS[provider];
     if (!cfg) {
@@ -270,13 +263,6 @@ serve(async (req) => {
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
-
-    // --- Credit check ---
-    const supabaseAdmin = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-      { auth: { persistSession: false } }
-    );
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
@@ -291,7 +277,7 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_ANON_KEY") ?? "",
     );
     const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
-    
+
     if (userError || !userData.user) {
       return new Response(JSON.stringify({ error: "User not authenticated" }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -299,12 +285,103 @@ serve(async (req) => {
     }
 
     const userId = userData.user.id;
-    
-    // Validate attachments early so we can calculate cost
-    const validAttachments: AttachmentData[] | undefined = Array.isArray(attachments) 
+    const apiKey = Deno.env.get(cfg.envKey);
+    if (!apiKey) {
+      return new Response(
+        JSON.stringify({ error: `${cfg.envKey} is not configured.` }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const getRunwayTaskStatus = async (id: string): Promise<{ status?: string; url?: string; error?: string }> => {
+      const taskResponse = await fetch(`https://api.dev.runwayml.com/v1/tasks/${id}`, {
+        headers: { ...cfg.authHeader(apiKey) },
+      });
+
+      if (!taskResponse.ok) {
+        const errText = await taskResponse.text();
+        console.error(`runwayml task poll error [${taskResponse.status}]:`, errText);
+        return { error: `RunwayML API error: ${taskResponse.status}` };
+      }
+
+      const taskData = await taskResponse.json();
+      const normalizedStatus = typeof taskData.status === "string" ? taskData.status.toLowerCase() : "processing";
+      const directOutput = taskData.output;
+      const outputList = Array.isArray(taskData.output)
+        ? taskData.output
+        : Array.isArray(taskData.outputs)
+          ? taskData.outputs
+          : [];
+      const firstOutput = outputList[0];
+      const url =
+        typeof directOutput === "string"
+          ? directOutput
+          : directOutput && typeof directOutput.url === "string"
+            ? directOutput.url
+            : typeof firstOutput === "string"
+              ? firstOutput
+              : firstOutput && typeof firstOutput.url === "string"
+                ? firstOutput.url
+                : typeof taskData.url === "string"
+                  ? taskData.url
+                  : typeof taskData.video_url === "string"
+                    ? taskData.video_url
+                    : undefined;
+      const error =
+        typeof taskData.failure === "string"
+          ? taskData.failure
+          : typeof taskData.error === "string"
+            ? taskData.error
+            : undefined;
+
+      return { status: normalizedStatus, url, error };
+    };
+
+    if (typeof taskId === "string" && taskId.trim()) {
+      if (provider !== "runwayml") {
+        return new Response(JSON.stringify({ error: "Task polling is not supported for this provider." }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const taskState = await getRunwayTaskStatus(taskId.trim());
+      if (taskState.error && !taskState.status) {
+        return new Response(JSON.stringify({ error: taskState.error }), {
+          status: 502,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      return new Response(JSON.stringify({
+        type: "video",
+        taskId: taskId.trim(),
+        status: taskState.status ?? "processing",
+        url: taskState.url,
+        error: taskState.error,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (!prompt || typeof prompt !== "string") {
+      return new Response(JSON.stringify({ error: "prompt string is required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // --- Credit check ---
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } }
+    );
+
+    const validAttachments: AttachmentData[] | undefined = Array.isArray(attachments)
       ? attachments.filter((a: any) => a?.base64 && a?.mimeType && a?.fileName)
       : undefined;
-    
+
     const baseCost = CREDIT_COSTS[cfg.type] ?? 1;
     const attachmentCost = calcAttachmentCost(validAttachments);
     const cost = baseCost + attachmentCost;
@@ -332,24 +409,12 @@ serve(async (req) => {
       });
     }
 
-    const apiKey = Deno.env.get(cfg.envKey);
-    if (!apiKey) {
-      await supabaseAdmin.rpc("add_credits", { p_user_id: userId, p_amount: cost });
-      return new Response(
-        JSON.stringify({ error: `${cfg.envKey} is not configured.` }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // validAttachments already computed above for cost calculation
-
     // Stability AI (binary image response)
     if (provider === "stability") {
       const formData = new FormData();
       formData.append("prompt", prompt);
       formData.append("output_format", "png");
 
-      // If there's an image attachment, use it as init_image for img2img
       if (validAttachments?.length && validAttachments[0].mimeType.startsWith("image/")) {
         const binaryStr = atob(validAttachments[0].base64);
         const bytes = new Uint8Array(binaryStr.length);
@@ -444,7 +509,27 @@ serve(async (req) => {
       }
 
       const data = await response.json();
-      return new Response(JSON.stringify({ type: "video", taskId: data.id, status: data.status, remaining_credits: remaining }), {
+      const directOutput = data.output;
+      const outputList = Array.isArray(data.output) ? data.output : [];
+      const firstOutput = outputList[0];
+      const videoUrl =
+        typeof directOutput === "string"
+          ? directOutput
+          : directOutput && typeof directOutput.url === "string"
+            ? directOutput.url
+            : typeof firstOutput === "string"
+              ? firstOutput
+              : firstOutput && typeof firstOutput.url === "string"
+                ? firstOutput.url
+                : undefined;
+
+      return new Response(JSON.stringify({
+        type: "video",
+        taskId: data.id,
+        status: typeof data.status === "string" ? data.status.toLowerCase() : "processing",
+        url: videoUrl,
+        remaining_credits: remaining,
+      }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }

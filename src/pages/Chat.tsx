@@ -11,12 +11,18 @@ import { useCredits } from "@/hooks/useCredits";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
 
+interface SavedMessageMetadata {
+  executionResult?: ExecutionResult;
+  [key: string]: unknown;
+}
+
 interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
   isPrompt?: boolean;
   attachments?: Attachment[];
+  metadata?: SavedMessageMetadata | null;
 }
 
 interface Conversation {
@@ -142,7 +148,6 @@ const Chat = () => {
     const updatedMessages = [...messages, userMsg];
     setMessages(updatedMessages);
     setIsLoading(true);
-    setExecutionResults({});
     setExecutingMsgId(null);
 
     let convId = activeConvId;
@@ -296,15 +301,38 @@ const Chat = () => {
   };
 
   const handleExecutionComplete = async (msgId: string, result: ExecutionResult) => {
-    // Persist final execution result to DB
-    try {
-      await supabase
-        .from("messages")
-        .update({ metadata: { executionResult: result } as any })
-        .eq("id", msgId);
-    } catch (e) {
-      console.error("Failed to save execution result:", e);
+    const persistedResult: ExecutionResult = {
+      provider: result.provider,
+      type: result.type,
+      content: result.content,
+      imageUrl: result.imageUrl,
+      imageData: result.imageData,
+      taskId: result.taskId,
+      status: result.status,
+    };
+
+    setExecutionResults((prev) => ({ ...prev, [msgId]: persistedResult }));
+
+    const currentMessage = messages.find((message) => message.id === msgId);
+    const nextMetadata: SavedMessageMetadata = {
+      ...(currentMessage?.metadata && typeof currentMessage.metadata === "object" ? currentMessage.metadata : {}),
+      executionResult: persistedResult,
+    };
+
+    const { error } = await supabase
+      .from("messages")
+      .update({ metadata: nextMetadata as any })
+      .eq("id", msgId);
+
+    if (error) {
+      console.error("Failed to save execution result:", error);
+      toast.error("Le résultat n’a pas pu être enregistré dans l’historique.");
+      return;
     }
+
+    setMessages((prev) =>
+      prev.map((message) => (message.id === msgId ? { ...message, metadata: nextMetadata } : message))
+    );
   };
 
   const handleNewChat = () => {

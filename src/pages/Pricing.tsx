@@ -37,7 +37,7 @@ const Pricing = () => {
         body: { priceId: PLANS[planKey].price_id },
       });
       if (error) throw error;
-      if (data?.url) window.open(data.url, "_blank");
+if (data?.url) window.location.href = data.url;
     } catch (e: any) {
       toast.error(e.message || "Error");
     } finally {
@@ -50,7 +50,7 @@ const Pricing = () => {
     try {
       const { data, error } = await supabase.functions.invoke("customer-portal");
       if (error) throw error;
-      if (data?.url) window.open(data.url, "_blank");
+      if (data?.url) window.location.href = data.url;
     } catch (e: any) {
       toast.error(e.message || "Error");
     } finally {

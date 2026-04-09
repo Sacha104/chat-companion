@@ -104,7 +104,7 @@ const Chat = () => {
       .eq("conversation_id", id)
       .order("created_at", { ascending: true });
     if (data) {
-      setMessages(data.map(m => ({ ...m, role: m.role as "user" | "assistant" })));
+      setMessages(data.map(m => ({ ...m, role: m.role as "user" | "assistant", metadata: (m.metadata && typeof m.metadata === "object" && !Array.isArray(m.metadata)) ? m.metadata as SavedMessageMetadata : null })));
       // Restore execution results from metadata
       const restored: Record<string, ExecutionResult> = {};
       for (const m of data) {

@@ -9,13 +9,21 @@ interface AIProvider {
   logoUrl: string;
   type: "text" | "code" | "image" | "video";
   website: string;
+  envVar: string;
 }
 
 const providers: AIProvider[] = [
-  { id: "openai", name: "OpenAI GPT", descKey: "ai_openai", logoUrl: "https://avatars.githubusercontent.com/u/14957082?s=200&v=4", type: "text", website: "https://openai.com" },
-  { id: "deepseek", name: "DeepSeek Coder", descKey: "ai_deepseek", logoUrl: "https://avatars.githubusercontent.com/u/148330874?s=200&v=4", type: "code", website: "https://deepseek.com" },
-  { id: "deepai", name: "DeepAI", descKey: "ai_deepai", logoUrl: "https://avatars.githubusercontent.com/u/28962678?s=200&v=4", type: "image", website: "https://deepai.org" },
-  { id: "runwayml", name: "RunwayML", descKey: "ai_runwayml", logoUrl: "https://avatars.githubusercontent.com/u/43209968?s=200&v=4", type: "video", website: "https://runwayml.com" },
+  { id: "openai", name: "OpenAI GPT", descKey: "ai_openai", logoUrl: "https://avatars.githubusercontent.com/u/14957082?s=200&v=4", type: "text", website: "https://platform.openai.com", envVar: "OPENAI_API_KEY" },
+  { id: "anthropic", name: "Anthropic Claude", descKey: "ai_openai", logoUrl: "https://avatars.githubusercontent.com/u/76263028?s=200&v=4", type: "text", website: "https://console.anthropic.com", envVar: "ANTHROPIC_API_KEY" },
+  { id: "gemini", name: "Google Gemini", descKey: "ai_openai", logoUrl: "https://www.gstatic.com/lamda/images/gemini_sparkle_v002_advanced_d2afd663b51d6f3b7c75.svg", type: "text", website: "https://aistudio.google.com", envVar: "GEMINI_API_KEY" },
+  { id: "mistral", name: "Mistral AI", descKey: "ai_openai", logoUrl: "https://avatars.githubusercontent.com/u/132372032?s=200&v=4", type: "text", website: "https://console.mistral.ai", envVar: "MISTRAL_API_KEY" },
+  { id: "deepseek", name: "DeepSeek Coder", descKey: "ai_deepseek", logoUrl: "https://avatars.githubusercontent.com/u/148330874?s=200&v=4", type: "code", website: "https://platform.deepseek.com", envVar: "DEEPSEEK_API_KEY" },
+  { id: "deepai", name: "DeepAI", descKey: "ai_deepai", logoUrl: "https://avatars.githubusercontent.com/u/28962678?s=200&v=4", type: "image", website: "https://deepai.org", envVar: "DEEPAI_API_KEY" },
+  { id: "leonardo", name: "Leonardo AI", descKey: "ai_deepai", logoUrl: "https://avatars.githubusercontent.com/u/103029719?s=200&v=4", type: "image", website: "https://leonardo.ai", envVar: "LEONARDO_API_KEY" },
+  { id: "stability", name: "Stability AI", descKey: "ai_deepai", logoUrl: "https://avatars.githubusercontent.com/u/100950301?s=200&v=4", type: "image", website: "https://platform.stability.ai", envVar: "STABILITY_API_KEY" },
+  { id: "runwayml", name: "RunwayML", descKey: "ai_runwayml", logoUrl: "https://avatars.githubusercontent.com/u/43209968?s=200&v=4", type: "video", website: "https://runwayml.com", envVar: "RUNWAYML_API_KEY" },
+  { id: "kling", name: "Kling AI", descKey: "ai_runwayml", logoUrl: "https://avatars.githubusercontent.com/u/170980588?s=200&v=4", type: "video", website: "https://klingai.com", envVar: "KLING_API_KEY" },
+  { id: "hailuo", name: "Hailuo AI (MiniMax)", descKey: "ai_runwayml", logoUrl: "https://avatars.githubusercontent.com/u/140905851?s=200&v=4", type: "video", website: "https://hailuoai.video", envVar: "HAILUO_API_KEY" },
 ];
 
 const OurAIs = () => {
@@ -86,6 +94,11 @@ const OurAIs = () => {
                 <p className="mb-4 flex-1 text-xs leading-relaxed text-muted-foreground">
                   {t(provider.descKey as any)}
                 </p>
+
+                <div className="mb-3 rounded-lg border border-dashed border-border bg-secondary/40 px-2.5 py-1.5">
+                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">API Key</p>
+                  <code className="text-[11px] font-mono text-foreground break-all">{provider.envVar}</code>
+                </div>
 
                 <a
                   href={provider.website}

@@ -78,7 +78,7 @@ const Unsubscribe = () => {
             <MailX className="w-16 h-16 text-destructive mx-auto" />
             <h1 className="text-2xl font-bold text-foreground">Se désabonner</h1>
             <p className="text-muted-foreground">
-              Souhaitez-vous vous désabonner des e-mails de Tornado ?
+              Souhaitez-vous vous désabonner des e-mails de PR@MPT ?
             </p>
             <Button onClick={handleUnsubscribe} variant="destructive" disabled={processing}>
               {processing ? "Traitement..." : "Confirmer le désabonnement"}

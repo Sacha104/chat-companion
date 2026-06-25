@@ -12,7 +12,7 @@ import {
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
 
-const SITE_NAME = 'Tornado'
+const SITE_NAME = 'PR@MPT'
 
 interface ContactNotificationProps {
   name?: string
@@ -50,7 +50,7 @@ const ContactNotificationEmail = ({ name, email, message }: ContactNotificationP
 export const template = {
   component: ContactNotificationEmail,
   subject: (data: Record<string, any>) =>
-    `[Tornado] Nouveau message de ${data.name || 'un utilisateur'}`,
+    `[PR@MPT] Nouveau message de ${data.name || 'un utilisateur'}`,
   displayName: 'Contact notification',
   to: 'support@tornado.com',
   previewData: { name: 'Jean Dupont', email: 'jean@example.com', message: 'Bonjour, j\'ai une question...' },

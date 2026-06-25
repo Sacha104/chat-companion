@@ -10,20 +10,20 @@ const translations = {
   hero_title_1: { fr: "Vos prompts,", en: "Your prompts," },
   hero_title_2: { fr: "optimisés par l'IA.", en: "optimized by AI." },
   hero_desc: {
-    fr: "Tornado génère des prompts optimisés pour chaque IA — OpenAI GPT, DeepSeek Coder, DeepAI et RunwayML. Obtenez les meilleurs résultats en texte, code, image et vidéo, automatiquement.",
-    en: "Tornado generates optimized prompts for every AI — OpenAI GPT, DeepSeek Coder, DeepAI and RunwayML. Get the best results in text, code, image and video, automatically.",
+    fr: "PR@MPT génère des prompts optimisés pour chaque IA — OpenAI GPT, DeepSeek Coder, DeepAI et RunwayML. Obtenez les meilleurs résultats en texte, code, image et vidéo, automatiquement.",
+    en: "PR@MPT generates optimized prompts for every AI — OpenAI GPT, DeepSeek Coder, DeepAI and RunwayML. Get the best results in text, code, image and video, automatically.",
   },
   hero_cta: { fr: "Créer un compte gratuit", en: "Create a free account" },
   hero_discover: { fr: "Découvrir", en: "Discover" },
-  features_title: { fr: "Pourquoi choisir Tornado ?", en: "Why choose Tornado?" },
+  features_title: { fr: "Pourquoi choisir PR@MPT ?", en: "Why choose PR@MPT?" },
   features_desc: {
     fr: "Générez des prompts optimisés et exploitez la puissance de l'IA au quotidien.",
     en: "Generate optimized prompts and harness the power of AI every day.",
   },
   feat1_title: { fr: "Prompts optimisés", en: "Optimized Prompts" },
   feat1_desc: {
-    fr: "Tornado reformule et optimise automatiquement vos demandes pour obtenir les meilleurs résultats de chaque IA.",
-    en: "Tornado automatically rewrites and optimizes your requests to get the best results from every AI.",
+    fr: "PR@MPT reformule et optimise automatiquement vos demandes pour obtenir les meilleurs résultats de chaque IA.",
+    en: "PR@MPT automatically rewrites and optimizes your requests to get the best results from every AI.",
   },
   feat2_title: { fr: "Multi-IA unifié", en: "Unified Multi-AI" },
   feat2_desc: {
@@ -37,13 +37,13 @@ const translations = {
   },
   prompts_title: { fr: "Des prompts générés et optimisés", en: "Generated & Optimized Prompts" },
   prompts_subtitle: {
-    fr: "Tornado analyse votre demande, génère un prompt optimisé et sélectionne automatiquement la meilleure IA pour y répondre.",
-    en: "Tornado analyzes your request, generates an optimized prompt and automatically selects the best AI to answer it.",
+    fr: "PR@MPT analyse votre demande, génère un prompt optimisé et sélectionne automatiquement la meilleure IA pour y répondre.",
+    en: "PR@MPT analyzes your request, generates an optimized prompt and automatically selects the best AI to answer it.",
   },
   prompts_feat1_title: { fr: "Génération automatique", en: "Auto Generation" },
   prompts_feat1_desc: {
-    fr: "Décrivez simplement ce que vous voulez. Tornado génère un prompt optimisé et identifie les IA les plus adaptées : texte, code, image ou vidéo.",
-    en: "Simply describe what you want. Tornado generates an optimized prompt and identifies the best-suited AIs: text, code, image or video.",
+    fr: "Décrivez simplement ce que vous voulez. PR@MPT génère un prompt optimisé et identifie les IA les plus adaptées : texte, code, image ou vidéo.",
+    en: "Simply describe what you want. PR@MPT generates an optimized prompt and identifies the best-suited AIs: text, code, image or video.",
   },
   prompts_feat2_title: { fr: "Exécution en un clic", en: "One-Click Execution" },
   prompts_feat2_desc: {
@@ -57,7 +57,7 @@ const translations = {
   },
   prompts_example: { fr: "Votre demande", en: "Your request" },
   prompts_example_text: { fr: "Je veux un logo minimaliste pour une startup tech", en: "I want a minimalist logo for a tech startup" },
-  prompts_optimized: { fr: "Prompt optimisé par Tornado :", en: "Prompt optimized by Tornado:" },
+  prompts_optimized: { fr: "Prompt optimisé par PR@MPT :", en: "Prompt optimized by PR@MPT:" },
   prompts_optimized_text: {
     fr: "Crée un logo épuré et minimaliste pour une startup tech. Utilise des formes géométriques, une police sans-serif moderne et une palette limitée de 2 à 3 couleurs. Le design doit évoquer l'innovation et la simplicité. Exporte en PNG haute résolution avec fond transparent.",
     en: "Create a clean, minimalist logo for a tech startup. Use geometric shapes, a modern sans-serif font, and a limited color palette of 2-3 colors. The design should convey innovation and simplicity. Output as high-resolution PNG with transparent background.",

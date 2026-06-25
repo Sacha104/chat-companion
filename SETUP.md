@@ -1,11 +1,12 @@
 # Tornado — Guide d'installation pour l'acheteur
 
-Ce projet est une application React + Vite + Tailwind, branchée sur **Supabase** (base de données, auth, edge functions) et **Stripe** (paiements). Toutes les clés API IA sont configurables via les secrets de tes edge functions Supabase — aucune clé n'est livrée avec le code.
+Ce projet est une application React + Vite + Tailwind, branchée sur **Supabase** (base de données, auth, edge functions), **Stripe** (paiements) et **Resend** (envoi d'emails). Toutes les clés API sont configurables via les secrets de tes edge functions Supabase — aucune clé n'est livrée avec le code.
 
 ## 1. Prérequis
 
 - Compte [Supabase](https://supabase.com) (gratuit pour démarrer)
 - Compte [Stripe](https://stripe.com)
+- Compte [Resend](https://resend.com) (gratuit jusqu'à 3 000 emails/mois) — pour les emails auth & transactionnels
 - Node.js 20+ et `bun` ou `npm`
 - Supabase CLI : `npm i -g supabase`
 
@@ -27,14 +28,7 @@ bun install
 
 ## 4. Configurer le code client
 
-Édite `src/integrations/supabase/client.ts` et remplace :
-
-```ts
-const SUPABASE_URL = "https://<TON_PROJECT_REF>.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "<TA_ANON_KEY>";
-```
-
-Édite aussi `.env` (créé à la racine) :
+`src/integrations/supabase/client.ts` lit déjà les variables d'environnement — tu n'as **rien à modifier dans le code**. Édite simplement le `.env` à la racine :
 
 ```
 VITE_SUPABASE_URL=https://<TON_PROJECT_REF>.supabase.co
@@ -76,26 +70,37 @@ Dans **Supabase Dashboard → Edge Functions → Secrets**, ajoute uniquement le
 | `KLING_API_KEY` | Kling | https://klingai.com |
 | `HAILUO_API_KEY` | Hailuo / MiniMax | https://hailuoai.video |
 | `STRIPE_SECRET_KEY` | Stripe (paiements) | https://dashboard.stripe.com/apikeys |
+| `RESEND_API_KEY` | Resend (envoi emails) | https://resend.com/api-keys |
+| `RESEND_WEBHOOK_SECRET` | Resend (bounces/plaintes) | https://resend.com/webhooks (créer un endpoint pointant vers `https://<PROJECT_REF>.supabase.co/functions/v1/handle-email-suppression`, copier le signing secret `whsec_…`) |
+| `SEND_EMAIL_HOOK_SECRET` | Supabase Auth Hook | Dashboard → Authentication → Hooks → Send Email Hook (active le hook HTTPS vers `https://<PROJECT_REF>.supabase.co/functions/v1/auth-email-hook` et copie le secret généré, format `v1,whsec_…`) |
+| `UNSUBSCRIBE_URL_BASE` | URL publique vers ta page `/unsubscribe` (ex: `https://mon-site.com/unsubscribe`) — utilisée dans l'en-tête `List-Unsubscribe` des emails |
 
 Les variables `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` sont injectées automatiquement par Supabase.
 
-## 8. Auth Google (optionnel)
+## 8. Domaine d'envoi Resend
+
+Dans **Resend Dashboard → Domains**, ajoute et vérifie ton domaine (ex : `prompt-me-up.com`). Ensuite, mets à jour les constantes `SITE_NAME`, `SENDER_DOMAIN`, `FROM_DOMAIN`, `ROOT_DOMAIN` en haut des fichiers :
+
+- `supabase/functions/auth-email-hook/index.ts`
+- `supabase/functions/send-transactional-email/index.ts`
+
+## 9. Auth Google (optionnel)
 
 **Supabase Dashboard → Authentication → Providers → Google** : active Google et colle ton Client ID / Secret obtenus sur https://console.cloud.google.com.
 
-## 9. Stripe
+## 10. Stripe
 
 1. Crée tes produits/prix dans Stripe Dashboard
 2. Mets à jour les `price_id` dans `src/pages/Pricing.tsx`
 3. Configure le webhook Stripe pointant vers ton edge function `stripe-webhook` (URL : `https://<TON_PROJECT_REF>.supabase.co/functions/v1/stripe-webhook`)
 
-## 10. Lancer en dev
+## 11. Lancer en dev
 
 ```bash
 bun run dev
 ```
 
-## 11. Déployer le frontend
+## 12. Déployer le frontend
 
 Le projet est compatible Vercel, Netlify, Cloudflare Pages. Build :
 

@@ -1,4 +1,4 @@
-# Tornado — Guide d'installation pour l'acheteur
+# PR@MPT — Guide d'installation pour l'acheteur
 
 Ce projet est une application React + Vite + Tailwind, branchée sur **Supabase** (base de données, auth, edge functions), **Stripe** (paiements) et **Resend** (envoi d'emails). Toutes les clés API sont configurables via les secrets de tes edge functions Supabase — aucune clé n'est livrée avec le code.
 

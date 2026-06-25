@@ -35,7 +35,7 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "Tornado"
+const SITE_NAME = "PR@MPT"
 const SENDER_DOMAIN = "ai.prompt-me-up.com"
 const ROOT_DOMAIN = "prompt-me-up.com"
 const FROM_DOMAIN = "ai.prompt-me-up.com" // Domain shown in From address (may be root or sender subdomain)

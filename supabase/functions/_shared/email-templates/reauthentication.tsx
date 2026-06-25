@@ -19,10 +19,10 @@ interface ReauthenticationEmailProps {
 export const ReauthenticationEmail = ({ token }: ReauthenticationEmailProps) => (
   <Html lang="fr" dir="ltr">
     <Head />
-    <Preview>Votre code de vérification Tornado</Preview>
+    <Preview>Votre code de vérification PR@MPT</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={brand}>Tornado</Heading>
+        <Heading style={brand}>PR@MPT</Heading>
         <Heading style={h1}>Confirmez votre identité</Heading>
         <Text style={text}>Utilisez le code ci-dessous pour confirmer votre identité :</Text>
         <Text style={codeStyle}>{token}</Text>

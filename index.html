@@ -41,6 +41,21 @@
 
   <body>
     <div id="root"></div>
+    <script>
+      (function () {
+        var params = new URLSearchParams(window.location.search);
+        var redirectedPath = params.get("p");
+
+        if (!redirectedPath) return;
+
+        var basePath = window.location.pathname.endsWith("/")
+          ? window.location.pathname
+          : window.location.pathname + "/";
+        var restoredPath = redirectedPath.charAt(0) === "/" ? redirectedPath.slice(1) : redirectedPath;
+
+        window.history.replaceState(null, "", basePath + restoredPath);
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

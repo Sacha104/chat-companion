@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Wand2, Code, Image, Video, Type, Loader2, Paperclip } from "lucide-react";
+import { Wand2, Code, Image, Video, Type, Loader2, Paperclip, Sparkles, Zap, Wind, Palette, Film, Star, Flame } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { Attachment } from "@/components/ChatInput";
@@ -15,9 +15,16 @@ interface AiSuggestion {
 
 const ALL_PROVIDERS: AiSuggestion[] = [
   { provider: "openai", label: "OpenAI GPT", description: "Texte & code polyvalent", icon: <Type className="h-4 w-4" />, type: "text", supportsAttachments: true },
+  { provider: "anthropic", label: "Claude (Anthropic)", description: "Texte & analyse avancée", icon: <Sparkles className="h-4 w-4" />, type: "text", supportsAttachments: true },
+  { provider: "gemini", label: "Google Gemini", description: "Texte & multimodal", icon: <Zap className="h-4 w-4" />, type: "text", supportsAttachments: true },
+  { provider: "mistral", label: "Mistral AI", description: "Texte & chat", icon: <Wind className="h-4 w-4" />, type: "text", supportsAttachments: false },
   { provider: "deepseek", label: "DeepSeek Coder", description: "Spécialisé code", icon: <Code className="h-4 w-4" />, type: "code", supportsAttachments: false },
+  { provider: "stability", label: "Stability AI", description: "Image haute qualité", icon: <Palette className="h-4 w-4" />, type: "image", supportsAttachments: true },
   { provider: "deepai", label: "DeepAI", description: "Image depuis texte/photo", icon: <Image className="h-4 w-4" />, type: "image", supportsAttachments: true },
+  { provider: "leonardo", label: "Leonardo AI", description: "Image artistique", icon: <Star className="h-4 w-4" />, type: "image", supportsAttachments: false },
   { provider: "runwayml", label: "RunwayML", description: "Vidéo depuis texte/photo", icon: <Video className="h-4 w-4" />, type: "video", supportsAttachments: true },
+  { provider: "kling", label: "Kling AI", description: "Vidéo depuis texte", icon: <Film className="h-4 w-4" />, type: "video", supportsAttachments: false },
+  { provider: "hailuo", label: "Hailuo AI", description: "Vidéo depuis texte", icon: <Flame className="h-4 w-4" />, type: "video", supportsAttachments: false },
 ];
 
 const fileToBase64 = (file: File): Promise<string> =>
@@ -76,10 +83,10 @@ function suggestProviders(prompt: string, hasAttachments: boolean): AiSuggestion
 
   // If attachments are present, only keep providers that support them
   if (hasAttachments) {
-    return suggestions.filter(s => s.supportsAttachments).slice(0, 6);
+    return suggestions.filter(s => s.supportsAttachments).slice(0, 11);
   }
 
-  return suggestions.slice(0, 6);
+  return suggestions.slice(0, 11);
 }
 
 interface PromptExecutorProps {

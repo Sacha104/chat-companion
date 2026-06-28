@@ -11,7 +11,7 @@ const normalizeBasePath = (value?: string) => {
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: normalizeBasePath(process.env.VITE_BASE_PATH),
+  base: "chat-companion",
   server: {
     host: "::",
     port: 8080,

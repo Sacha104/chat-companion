@@ -35,58 +35,40 @@ const fileToBase64 = (file: File): Promise<string> =>
     reader.readAsDataURL(file);
   });
 
-function suggestProviders(prompt: string, hasAttachments: boolean): AiSuggestion[] {
+type Intent = "text" | "code" | "image" | "video";
+
+function detectIntent(prompt: string): Intent {
   const lower = prompt.toLowerCase();
-  const suggestions: AiSuggestion[] = [];
 
-  // If attachments are present, prioritize multimodal providers
+  if (/\b(image|photo|logo|illustration|dessin|poster|artwork)\b/i.test(lower)) {
+    return "image";
+  }
+
+  if (/\b(video|animation|film|clip|motion)\b/i.test(lower)) {
+    return "video";
+  }
+
+  if (/\b(code|script|function|api|react|javascript|python|sql|debug)\b/i.test(lower)) {
+    return "code";
+  }
+
+  return "text";
+}
+
+function suggestProviders(prompt: string, hasAttachments: boolean): AiSuggestion[] {
+  const intent = detectIntent(prompt);
+
+  let providers = ALL_PROVIDERS.filter(p => p.type === intent);
+
   if (hasAttachments) {
-    suggestions.push(
-      ALL_PROVIDERS.find(p => p.provider === "openai")!,
-      ALL_PROVIDERS.find(p => p.provider === "deepai")!,
-    );
+    providers = providers.filter(p => p.supportsAttachments);
   }
 
-  const hasImage = /\b(image|photo|illustration|dessin|logo|picture|icon[eê]?|affiche|poster|artwork)\b/i.test(lower);
-  const hasVideo = /\b(vid[eé]o|animation|motion|clip|film|cin[eé]ma)\b/i.test(lower);
-  const hasCode = /\b(code|program|script|function|algorithm|api|développ|develop|debug|html|css|javascript|python|react|sql)\b/i.test(lower);
-
-  if (hasImage) {
-    const deepai = ALL_PROVIDERS.find(p => p.provider === "deepai")!;
-    if (!suggestions.find(s => s.provider === deepai.provider)) suggestions.push(deepai);
+  if (providers.length === 0) {
+    providers = ALL_PROVIDERS.filter(p => p.type === "text");
   }
 
-  if (hasVideo) {
-    const runway = ALL_PROVIDERS.find(p => p.provider === "runwayml")!;
-    if (!suggestions.find(s => s.provider === runway.provider)) suggestions.push(runway);
-  }
-
-  if (hasCode) {
-    const deepseek = ALL_PROVIDERS.find(p => p.provider === "deepseek")!;
-    const openai = ALL_PROVIDERS.find(p => p.provider === "openai")!;
-    if (!suggestions.find(s => s.provider === deepseek.provider)) suggestions.push(deepseek);
-    if (!suggestions.find(s => s.provider === openai.provider)) suggestions.push(openai);
-  }
-
-  if (suggestions.length === 0) {
-    suggestions.push(
-      ALL_PROVIDERS.find(p => p.provider === "openai")!,
-      ALL_PROVIDERS.find(p => p.provider === "deepseek")!,
-    );
-  }
-
-  for (const p of ALL_PROVIDERS) {
-    if (!suggestions.find(s => s.provider === p.provider)) {
-      suggestions.push(p);
-    }
-  }
-
-  // If attachments are present, only keep providers that support them
-  if (hasAttachments) {
-    return suggestions.filter(s => s.supportsAttachments).slice(0, 11);
-  }
-
-  return suggestions.slice(0, 11);
+  return providers;
 }
 
 interface PromptExecutorProps {
